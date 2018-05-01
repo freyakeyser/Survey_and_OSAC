@@ -153,13 +153,13 @@ seedboxes$Open <- dmy(seedboxes$Open)
 seedboxes <- seedboxes[,-grep("comment",names(seedboxes))]
 
 #Read4 Get the survey boundary polygons for all banks.
-survey.bound.polys<-read.csv(paste(direct,"data/Maps/approved/Survey/survey_boundary_polygons.csv",sep=""),
+survey.bound.polys<-read.csv(paste0(direct,"2018/Misc/Sable_re_stratification/Sable_new_boundary_sp.csv"), ### possible that these need timeseries
                              header=T,stringsAsFactors = F)
 #Read5 Get the detailed survey polygons for all banks
-survey.detail.polys <- read.csv(paste(direct,"data/Maps/approved/Survey/survey_detail_polygons.csv",sep=""),
+survey.detail.polys <- read.csv(paste0(direct,"/2018/Misc/Sable_re_stratification/Sable_new_strata_sp.csv"), ### possible that these need timeseries
                                 header=T,stringsAsFactors = F)
 #Read6 Get the survey information for each bank
-survey.info <- read.csv(paste(direct,"data/Survey_data/survey_information.csv",sep=""),
+survey.info <- read.csv(paste(direct,"data/Survey_data/survey_information_2018-04-30.csv",sep=""),
                         header=T,stringsAsFactors = F)
 
 #Read7 The boundary between Fully recruited and recruit size classes (RS = Recruit min, CS = Fully recruited (commercial) min)
