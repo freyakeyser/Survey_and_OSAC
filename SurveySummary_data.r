@@ -362,12 +362,12 @@ years <- yr.start:yr
 # From 1996-current CS= 95, RS = 85
 # This is the Shell height for each shell height category. If it ever changes in the future this will need adjusted.
 # If we are still using this code in 2030 I'll be both old and worried...
-if(bnk %in% c("GB","GBa","GBb"))
-{
-  SH.dat <- data.frame(year = 1980:2030,CS = c(rep(75,6),rep(85,10),rep(95,2030-1995)),RS = c(rep(60,6),rep(75,10),rep(85,2030-1995)))
-  CS <- SH.dat$CS[SH.dat$year %in% years]
-  RS <- SH.dat$RS[SH.dat$year %in% years]
-}# End if(bnk == "GBa")
+  if(bnk %in% c("GB","GBa","GBb"))
+  {
+    SH.dat <- data.frame(year = 1980:2030,CS = c(rep(75,6),rep(85,10),rep(95,2030-1995)),RS = c(rep(60,6),rep(75,10),rep(85,2030-1995)))
+    CS <- SH.dat$CS[SH.dat$year %in% years]
+    RS <- SH.dat$RS[SH.dat$year %in% years]
+  } # End if(bnk == "GBa")
 
   # Now we can set up our more detailed SHF bins as well
   if(bins == "bank_default")
@@ -388,7 +388,7 @@ if(bnk %in% c("GB","GBa","GBb"))
   bank.dat[[bnk]] <- subset(bank.dat[[bnk]] , year %in% years)
 
     # Now run the survey boundary and seedboxes in here.
-    # Get the  bank survey boundary polygon this replaces #Read3
+    # Get the  bank survey boundary polygon this replaces #Read3 # this is the CURRENT boundary. Does it need to know the old boundary I wonder?
     bound.poly.surv <- subset(survey.bound.polys,label==bnk) 
     attr(bound.poly.surv,"projection")<-"LL"
     
@@ -398,7 +398,7 @@ if(bnk %in% c("GB","GBa","GBb"))
     attr(detail.poly.surv,"projection")<-"LL"
     
     # Get the strata areas. ## FKSABLENOTE ##
-    strata.areas <- subset(survey.info,label==bnk,select =c("Strata_ID","towable_area"))
+    strata.areas <- subset(survey.info,label==bnk,select =c("Strata_ID","towable_area","startyear"))
     #Read25 read removed... Get all the details of the survey strata
     surv.info <- subset(survey.info,label== bnk)
     # Give each tow a unique identifier.
