@@ -392,7 +392,6 @@ years <- yr.start:yr
     bound.poly.surv <- subset(survey.bound.polys,label==bnk) 
     attr(bound.poly.surv,"projection")<-"LL"
     
-    # Sable Bank Polygons	
     #Read4 Read drooped #Detailed Survey polygons
     detail.poly.surv <- subset(survey.detail.polys,label==bnk)
     attr(detail.poly.surv,"projection")<-"LL"
@@ -412,21 +411,22 @@ years <- yr.start:yr
     # Assign the strat based on location, the "new_strata" column is used for processing later on in the function so I've retained it.
     # We used to write to the screen what percentage of strata were reassigned. But the strata are now entered as NULL so it'll always be 100%
     # German and Middle bank have no stratifcation scheme and we don't do this for GB spring which is fixed stations.
-    if(bnk = "Sab") {
+    if(bnk == "Sab") {
       strata.years <- unique(detail.poly.surv[detail.poly.surv$label==bnk,]$startyear)
       nrestrat <- length(strata.years)
       
       #this handles one restratification only...
-      oldscheme <- bank.dat[[bnk]][bank.dat[[bnk]]$year < strata.years[nrestrat],]
-      newscheme <- bank.dat[[bnk]][bank.dat[[bnk]]$year == strata.years[nrestrat] | bank.dat[[bnk]]$year > strata.years[nrestrat],]
+      oldscheme <- assign.strata(bank.dat[[bnk]], detail.poly.surv[!detail.poly.surv$startyear == strata.years[nrestrat],])
+      newscheme <- assign.strata(bank.dat[[bnk]], detail.poly.surv[detail.poly.surv$startyear == strata.years[nrestrat],])
       
-      oldscheme <- assign.strata(oldscheme, detail.poly.surv[!detail.poly.surv$startyear == strata.years[nrestrat],])
-      newscheme <- assign.strata(newscheme, detail.poly.surv[detail.poly.surv$startyear == strata.years[nrestrat],])
+      names(newscheme)[dim(newscheme)[2]] <- "Strata_ID_new"
+      names(oldscheme)[dim(oldscheme)[2]] <- "Strata_ID_old"
       
-      bank.dat[[bnk]] <- rbind(oldscheme, newscheme)
+      # bank.dat[[bnk]] <- rbind(oldscheme[oldscheme$year < strata.years[nrestrat],], newscheme[newscheme$year == strata.years[nrestrat]|newscheme$year > strata.years[nrestrat],])
+      bank.dat[[bnk]] <- cbind(newscheme, data.frame(Strata_ID_old=oldscheme[,dim(oldscheme)[2]]))
     }
       
-    if(bnk != "Ger" && bnk != "Mid"  && bnk != "GB" && bnk!= "Sab") bank.dat[[bnk]]<- assign.strata(bank.dat[[bnk]],detail.poly.surv)
+    if(bnk != "Ger" && bnk != "Mid"  && bnk != "GB" && bnk!= "Sab") bank.dat[[bnk]] <- assign.strata(bank.dat[[bnk]],detail.poly.surv)
     # above assigns strata to each tow. Note that since Sable has been restratified, some tows are now outside of the strata bounds and marked as NA.
 
 		# MEAT WEIGHT DATA from 2011-current
