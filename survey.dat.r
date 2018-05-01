@@ -7,6 +7,9 @@
 # Revised May 5, 2017, edited so that this script can work with only "1 strata", i.e. a non-stratatifed survey.
 # June 2017:  Revised to allow for user specified bin sizes.
 # October 2017:  Had to add in if statement for the model.dat <- bit as objects in teh global environment call "tmp" were causing issues.
+# May 2018: FK modified calculation of stratified estimates due to the removal of WEBCA from survey domain. THe code has been standardized 
+#           to handle future re-stratifications on any bank, but requires that new strata areas be appended to survey_information.csv.
+#           DO NOT DELETE OLD STRATA INFORMATION from survey_information.csv as this is used to restratify historical surveys appropriately.
 ################################################################################################################
 
 #####################################  Function Summary ########################################################
@@ -57,9 +60,15 @@ survey.dat <- function(shf, htwt.fit, years, RS=80, CS=100, bk="GBa", areas,  mw
   
   # If years is not supplied than obtain from the data
 	if(missing(years)==T) years<-sort(unique(shf$year))
-
-	# Create strata object for PEDstrata package, includes Strata and number of towable units in that strata.
-	HSIstrata.obj <- data.frame(Strata=areas[,1], NH=areas[,2])[order(areas[,1]),]
+  
+  # Sable was restratified prior to 2018 survey due to the creation of the Western Emerald Bank Conservation Area. 
+  # It was decided at February 2018 Survey Working Group meeting to remove WEBCA from Sable strata, therefore, a domain estimator
+  # is required to convert pre-2018 survey data to the new strata. For this reason, we must break this script into a pre and post 
+  # re-stratification sections.
+  # 1900 has been set as the start year for all offshore strata up to 2018, since these are the strata to be used for all data < 2018.
+  
+  # Create strata object for PEDstrata package, includes Strata and number of towable units in that strata.
+	HSIstrata.obj <- data.frame(Strata=areas[,1], NH=areas[,2], startyear=areas[,3])[order(areas[,1]),]
 	
 	# Output the object to screen and determine the number of towable units for this bank.
 	print(HSIstrata.obj)
@@ -123,6 +132,7 @@ survey.dat <- function(shf, htwt.fit, years, RS=80, CS=100, bk="GBa", areas,  mw
 	  ann.dat<-subset(shf,year==years[i])
 	  # Use the MW-SH model fit to calculate the meat weight, assumes that year was a random effect in the model
 	  # Remember mw is in grams here.
+	  # FK had to specify htwt.fit <- SpatHtWt.fit[[bnk]]??
 	  if(mw.par=='annual') mw[[i]] <- matrix(exp(log(seq(2.5,200,5))*htwt.fit$b[i]+log(htwt.fit$a[i])),
 	                                         nrow(ann.dat),40,byrow=T,dimnames=list(ann.dat$tow,mw.bin))
 	  # Use the MW-SH model fit to calculate the meat weight, assumes that year was not included in the model
@@ -178,6 +188,25 @@ survey.dat <- function(shf, htwt.fit, years, RS=80, CS=100, bk="GBa", areas,  mw
 	  if(!is.null(nrow(w.stratmeans[[i]]))) w.yst[i,] <- apply(sapply(1:nrow(w.stratmeans[[i]]), function(x){w.stratmeans[[i]][x,] * pstrat[x]}),1,sum)
 	  w.Yst <- w.yst[i,] * sum(N.tu)
 	  
+	  
+	  ################ from 29W
+	  scall.dom <- Domain.estimates(data.obj.i$STDTOTALCAUGHT, data.obj.i$Start.Bottom, data.obj.i$SDM, strata.bottomtypeandzone.A, strata.group.i)
+	  scall.est.A[[m]] <- c(YR=year[i], SUBAREA=subarea, scall.dom)
+	  scall.sum <- summary.domain.est(scall.dom)
+	  out[m,(3:4)] <- as.numeric(c(scall.sum[[2]][2],scall.sum[[2]][3]))
+	  
+	  scall.levels.A <- with(scall.dom,data.frame(ybd=(unlist(ybd)),var.ybd=(unlist(var.ybd)),var.diffdomain=(unlist(var.diffdomain)),se.ybd=(unlist(se.ybd)) ))
+	  scall.levels.A$LEVEL <- row.names(scall.levels.A) 
+	  scall.levels.A$YEAR <- rep(year[i],3)
+	  scall.levels.A$SUBAREA <- rep(subarea,3)
+	  scall.levels.A.2005to2007[[m]] <- scall.levels.A 
+	  ################ from 29W
+	  
+	  if(bnk=="Sab"){
+	    # Strata calculations for biomass for commerical size Scallops
+	    Strata.obj$I[[i]] <- Domain.estimates(w, HSIstrata.obj,'STRATA.ID',w$com)
+	    
+	  }
 	  
 	  # Strata calculations for biomass for commerical size Scallops
 	  Strata.obj$I[[i]] <- PEDstrata(w, HSIstrata.obj,'STRATA.ID',w$com)
