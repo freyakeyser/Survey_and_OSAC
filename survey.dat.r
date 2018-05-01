@@ -186,7 +186,7 @@ survey.dat <- function(shf, htwt.fit, years, RS=80, CS=100, bk="GBa", areas,  mw
 	    w.stratmeans[[i]] <- with(w, sapply(1:40, function(x){tapply(w[,x],STRATA.ID.NEW,mean)}))
 	    
 	    
-	    ### do i have to do this for old as well??
+	    ### do i have to do this for old as well?? START HERE WEDNESDAY!
 	    
 	    
 	    
