@@ -153,10 +153,10 @@ seedboxes$Open <- dmy(seedboxes$Open)
 seedboxes <- seedboxes[,-grep("comment",names(seedboxes))]
 
 #Read4 Get the survey boundary polygons for all banks.
-survey.bound.polys<-read.csv(paste0(direct,"2018/Misc/Sable_re_stratification/Sable_new_boundary_sp.csv"), ### possible that these need timeseries
+survey.bound.polys<-read.csv(paste0(direct,"Data/Maps/approved/Survey/survey_boundary_polygons.csv"), 
                              header=T,stringsAsFactors = F)
 #Read5 Get the detailed survey polygons for all banks
-survey.detail.polys <- read.csv(paste0(direct,"/2018/Misc/Sable_re_stratification/Sable_new_strata_sp.csv"), ### possible that these need timeseries
+survey.detail.polys <- read.csv(paste0(direct,"Data/Maps/approved/Survey/survey_detail_polygons.csv"), 
                                 header=T,stringsAsFactors = F)
 #Read6 Get the survey information for each bank
 survey.info <- read.csv(paste(direct,"data/Survey_data/survey_information_2018-04-30.csv",sep=""),
@@ -412,7 +412,22 @@ years <- yr.start:yr
     # Assign the strat based on location, the "new_strata" column is used for processing later on in the function so I've retained it.
     # We used to write to the screen what percentage of strata were reassigned. But the strata are now entered as NULL so it'll always be 100%
     # German and Middle bank have no stratifcation scheme and we don't do this for GB spring which is fixed stations.
-    if(bnk != "Ger" && bnk != "Mid"  && bnk != "GB") bank.dat[[bnk]]<- assign.strata(bank.dat[[bnk]],detail.poly.surv)
+    if(bnk = "Sab") {
+      strata.years <- unique(detail.poly.surv[detail.poly.surv$label==bnk,]$startyear)
+      nrestrat <- length(strata.years)
+      
+      #this handles one restratification only...
+      oldscheme <- bank.dat[[bnk]][bank.dat[[bnk]]$year < strata.years[nrestrat],]
+      newscheme <- bank.dat[[bnk]][bank.dat[[bnk]]$year == strata.years[nrestrat] | bank.dat[[bnk]]$year > strata.years[nrestrat],]
+      
+      oldscheme <- assign.strata(oldscheme, detail.poly.surv[!detail.poly.surv$startyear == strata.years[nrestrat],])
+      newscheme <- assign.strata(newscheme, detail.poly.surv[detail.poly.surv$startyear == strata.years[nrestrat],])
+      
+      bank.dat[[bnk]] <- rbind(oldscheme, newscheme)
+    }
+      
+    if(bnk != "Ger" && bnk != "Mid"  && bnk != "GB" && bnk!= "Sab") bank.dat[[bnk]]<- assign.strata(bank.dat[[bnk]],detail.poly.surv)
+    # above assigns strata to each tow. Note that since Sable has been restratified, some tows are now outside of the strata bounds and marked as NA.
 
 		# MEAT WEIGHT DATA from 2011-current
 		# Get the mw data from 2011 to this year
@@ -428,7 +443,7 @@ years <- yr.start:yr
 		
 		# MODEL - This is the meat weight Shell height realationship.  
 		#MEAT WEIGHT SHELL HEIGHT RELATIONSHIP in current year 
-		#Source5 source("fn/shwt.lme.r") note thtat the exponent is set as a parameter here b=3
+		#Source5 source("fn/shwt.lme.r") note that the exponent is set as a parameter here b=3
 		SpatHtWt.fit[[bnk]] <- shwt.lme(mw.dm,random.effect='tow',b.par=3)
 		
 		# here we are putting the MW hydration sampling from 2010 and earlier together with the data since 2010 and 
