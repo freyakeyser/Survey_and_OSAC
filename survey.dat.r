@@ -154,7 +154,6 @@ survey.dat <- function(shf, htwt.fit, years, RS=80, CS=100, bk="GBa", areas,  mw
 	  if(mw.par !='annual' && mw.par !='fixed') mw[[i]]<-sweep(matrix((seq(2.5,200,5)/100)^3,nrow(ann.dat),
 	                                                                  40,byrow=T,dimnames=list(ann.dat$tow,mw.bin)),1,FUN='*',ann.dat[,mw.par])
 	  
-	  if(!bnk=="Sab"){
 	  num <- data.frame(subset(shf, year==years[i], which(bin==5):which(bin==200)), 
 	                    STRATA.ID=shf$Strata_ID[shf$year==years[i]])
 	  
@@ -194,7 +193,6 @@ survey.dat <- function(shf, htwt.fit, years, RS=80, CS=100, bk="GBa", areas,  mw
 	  if(is.null(nrow(w.stratmeans[[i]])))  w.yst[i,] <- w.stratmeans[[i]]
 	  if(!is.null(nrow(w.stratmeans[[i]]))) w.yst[i,] <- apply(sapply(1:nrow(w.stratmeans[[i]]), function(x){w.stratmeans[[i]][x,] * pstrat[x]}),1,sum)
 	  w.Yst <- w.yst[i,] * sum(N.tu)
-	  } #end if(!bnk=="Sab")
 	  
 	  # Strata calculations for biomass for commerical size Scallops
 	  Strata.obj$I[[i]] <- PEDstrata(w, HSIstrata.obj,'STRATA.ID',w$com)
