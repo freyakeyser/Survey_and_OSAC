@@ -70,12 +70,30 @@ if(missing(years)==T) years<-sort(unique(shf$year))
 # 1900 has been set as the start year for all offshore strata up to 2018, since these are the strata to be used for all data < 2018.
 
 # Create strata object for PEDstrata package, includes Strata and number of towable units in that strata.
-HSIstrata.obj <- data.frame(Strata=areas[,1], NH=areas[,2], startyear=areas[,3])[order(areas[,1]),]
+# Yes I know Strata and strata.id are the same, but Domainestimates.R uses both columns, and I'm rolling with the punches here.
+HSIstrata.obj <- data.frame(Strata=areas[,1], strata.id=areas[,1], NH=areas[,2], startyear=areas[,3])[order(areas[,1]),]
+if(length(unique(HSIstrata.obj$startyear))==2){
+strata.obj <- HSIstrata.obj[HSIstrata.obj$startyear == min(unique(HSIstrata.obj$startyear)),]
+domain.obj <- HSIstrata.obj[HSIstrata.obj$startyear == max(unique(HSIstrata.obj$startyear)),]
+
+# also need to make the strata names different from each other. So I'm just making up a new convention for the new strata.
+domain.obj$Strata <- paste0(domain.obj$Strata, "_2.0")
+domain.obj$strata.id <- paste0(domain.obj$strata.id, "_2.0")
+
+# and you gotta do this in your actual tow data too. Everything has to match.
+shf$Strata_ID_new  <- paste0(shf$Strata_ID_new, "_2.0")
+}
+
+if(!length(unique(HSIstrata.obj$startyear))==2){
+  "Houston you have a problem. You either don't need to restratify this bank at all, and therefore shouldn't be in the survey.dat.restrat function,
+  or you have to re-write this to accommmodate more than 1 restratification. Sorry that you have to go through that, cuz even doing this much was hard.
+  Take a walk to clear your mind and prepare yourself for some coding!"
+}
 
 # Output the object to screen and determine the number of towable units for this bank.
-print(HSIstrata.obj)
+print(strata.obj)
+print(domain.obj)
 N.tu <- HSIstrata.obj$NH
-
 
 # for easier indexing of shell height bins in shf
 bin <- as.numeric(substr(names(shf),2,nchar(names(shf))))
@@ -111,7 +129,6 @@ if(!is.null(user.bins))
   tmp$year <- years
 } # end if(!is.null(user.bins))
 
-
 # intialize objects for upcoming for loop.
 w.yst <- matrix(NA, length(years), 40)
 n.yst <- w.yst
@@ -121,14 +138,24 @@ strat.res <- data.frame(year=years)
 Strata.obj <- NULL
 mw <- NULL
 
+#objects for domain estimation
+scall.est.w.IPR <- NULL
+scall.est.w.IR <- NULL
+scall.est.w.I <- NULL
+scall.est.n.IPR <- NULL
+scall.est.n.IR <- NULL
+scall.est.n.I <- NULL
 
 # If CS and RS are just one value turn them into a vector the same length as the number of years of data.
 if(length(CS) == 1)	CS <- rep(CS, length(years))
 if(length(RS) == 1)	RS <- rep(RS, length(years))
 
-# For loop to do the calculations of meat weight for non-restratified banks
+# For loop to do the calculations of meat weight for non-restratified banks. Domain estimation happens in here too!
+m=0 # indexing variable
 for(i in 1:length(years))
 {
+  m=m+1
+  
   # Set the bins
   mw.bin<-seq(5,200,5)
   # select the current years data.
@@ -150,11 +177,11 @@ for(i in 1:length(years))
   
   if(mw.par !='annual' && mw.par !='fixed') mw[[i]]<-sweep(matrix((seq(2.5,200,5)/100)^3,nrow(ann.dat),
                                                                   40,byrow=T,dimnames=list(ann.dat$tow,mw.bin)),1,FUN='*',ann.dat[,mw.par])
-  
+print("Careful, you didn't specify the location for prediction of CF so I have picked mean depth, lat, and lon between 2005 and 2014 be sure this is how this has been done in the past!")
 
-print("Careful, you didn't specify the location for prediction of CF so I have picked mean depth, lat, and lon between 2005 and 2014 be sure this is how this has been done in the past!")num <- data.frame(subset(shf, year==years[i], which(bin==5):which(bin==200)), 
-                                                                                                                                                                                                            STRATA.ID.NEW=shf$Strata_ID_new[shf$year==years[i]],
-                                                                                                                                                                                                            STRATA.ID.OLD=shf$Strata_ID_old[shf$year==years[i]])
+num <- data.frame(subset(shf, year==years[i], which(bin==5):which(bin==200)), 
+                  STRATA.ID.NEW=shf$Strata_ID_new[shf$year==years[i]], 
+                  STRATA.ID.OLD=shf$Strata_ID_old[shf$year==years[i]])
 
 # Remove rows with strata ID's which are NA's
 num<-na.omit(num)
@@ -169,6 +196,7 @@ num$com <- rowSums(num[, which(mw.bin==CS[i]):which(mw.bin==200)],na.rm=T)
 w <- data.frame(subset(shf, year==years[i], which(bin==5):which(bin==200))*mw[[i]], 
                 STRATA.ID.NEW=shf$Strata_ID_new[shf$year==years[i]],
                 STRATA.ID.OLD=shf$Strata_ID_old[shf$year==years[i]])
+
 # Remove any rows in which the strata is NA
 w<-na.omit(w)
 # Add up the biomass of Scallops in each size category, again this is in grams per tow
@@ -183,17 +211,30 @@ pstrat_old <- as.numeric(N.tu[c(2,4,6,8,10)]/sum(N.tu[c(2,4,6,8,10)]))
 
 # get domaine estimator for biomasses in each size category - Domain.estimates(data, Strata, Domain, strata.obj, domain.obj, Nd = NULL
 source("E:/INSHORE SCALLOP/BoF/Assessment_fns/SFA29W/Domainestimates.R")
-scall.dom.w.IPR <- Domain.estimates(w$pre, w$STRATA.ID.OLD, w$STRATA.ID.NEW, HSIstrata.obj[HSIstrata.obj$startyear==1900,],HSIstrata.obj[HSIstrata.obj$startyear==2018,])
-scall.dom.w.IR <- Domain.estimates(w$rec, w$STRATA.ID.OLD, w$STRATA.ID.NEW, HSIstrata.obj[HSIstrata.obj$startyear==1900,],HSIstrata.obj[HSIstrata.obj$startyear==2018,])
-scall.dom.w.I <- Domain.estimates(w$com, w$STRATA.ID.OLD, w$STRATA.ID.NEW, HSIstrata.obj[HSIstrata.obj$startyear==1900,],HSIstrata.obj[HSIstrata.obj$startyear==2018,])
+scall.dom.w.IPR <- Domain.estimates(w$pre, w$STRATA.ID.OLD, w$STRATA.ID.NEW, strata.obj, domain.obj)
+scall.dom.w.IR <- Domain.estimates(w$rec, w$STRATA.ID.OLD, w$STRATA.ID.NEW, strata.obj, domain.obj)
+scall.dom.w.I <- Domain.estimates(w$com, w$STRATA.ID.OLD, w$STRATA.ID.NEW, strata.obj, domain.obj)
 
-scall.dom.n.IPR <- Domain.estimates(num$pre, num$STRATA.ID.OLD, num$STRATA.ID.NEW, HSIstrata.obj[HSIstrata.obj$startyear==1900,],HSIstrata.obj[HSIstrata.obj$startyear==2018,])
-scall.dom.n.IR <- Domain.estimates(num$rec, num$STRATA.ID.OLD, num$STRATA.ID.NEW, HSIstrata.obj[HSIstrata.obj$startyear==1900,],HSIstrata.obj[HSIstrata.obj$startyear==2018,])
-scall.dom.n.I <- Domain.estimates(num$com, num$STRATA.ID.OLD, num$STRATA.ID.NEW, HSIstrata.obj[HSIstrata.obj$startyear==1900,],HSIstrata.obj[HSIstrata.obj$startyear==2018,])
+scall.dom.n.IPR <- Domain.estimates(num$pre, num$STRATA.ID.OLD, num$STRATA.ID.NEW, strata.obj, domain.obj)
+scall.dom.n.IR <- Domain.estimates(num$rec, num$STRATA.ID.OLD, num$STRATA.ID.NEW, strata.obj, domain.obj)
+scall.dom.n.I <- Domain.estimates(num$com, num$STRATA.ID.OLD, num$STRATA.ID.NEW, strata.obj, domain.obj)
 
+scall.est.w.IPR[[m]] <- c(YR=years[i], bank=bnk, scall.dom.w.IPR)
+scall.est.w.IR[[m]] <- c(YR=years[i], bank=bnk, scall.dom.w.IR)
+scall.est.w.I[[m]] <- c(YR=years[i], bank=bnk, scall.dom.w.I)
 
-scall.est.A[[m]] <- c(YR=year[i], SUBAREA=subarea, scall.dom)
-scall.sum <- summary.domain.est(scall.dom)
+scall.est.n.IPR[[m]] <- c(YR=years[i], bank=bnk, scall.dom.n.IPR)
+scall.est.n.IR[[m]] <- c(YR=years[i], bank=bnk, scall.dom.n.IR)
+scall.est.n.I[[m]] <- c(YR=years[i], bank=bnk, scall.dom.n.I)
+
+scall.sum.w.IPR <- summary.domain.est(scall.dom.w.IPR)
+scall.sum.w.IR <- summary.domain.est(scall.dom.w.IR)
+scall.sum.w.I <- summary.domain.est(scall.dom.w.I)
+
+scall.sum.n.IPR <- summary.domain.est(scall.dom.n.IPR)
+scall.sum.n.IR <- summary.domain.est(scall.dom.n.IR)
+scall.sum.n.I <- summary.domain.est(scall.dom.n.I)
+
 out[m,(3:4)] <- as.numeric(c(scall.sum[[2]][2],scall.sum[[2]][3]))
 
 scall.levels.A <- with(scall.dom,data.frame(ybd=(unlist(ybd)),var.ybd=(unlist(var.ybd)),var.diffdomain=(unlist(var.diffdomain)),se.ybd=(unlist(se.ybd)) ))
