@@ -145,7 +145,7 @@ scall.est.w.I <- NULL
 scall.est.n.IPR <- NULL
 scall.est.n.IR <- NULL
 scall.est.n.I <- NULL
-out <- data.frame(YEAR=years,BANK=bnk,
+out.domain <- data.frame(YEAR=years,BANK=bnk,
                   yst.w.IPR=rep(NA,length(years)),
                   var.yst.w.IPR=rep(NA,length(years)),
                   yst.w.IR=rep(NA,length(years)),
@@ -224,6 +224,8 @@ w$com <- rowSums(w[, which(mw.bin==CS[i]):which(mw.bin==200)],na.rm=T)
 pstrat_new <- as.numeric(N.tu[c(1,3,5,7,9)]/sum(N.tu[c(1,3,5,7,9)]))
 pstrat_old <- as.numeric(N.tu[c(2,4,6,8,10)]/sum(N.tu[c(2,4,6,8,10)]))
 
+# restratification occurs for all years < 2018
+if(years[i]<max(unique(HSIstrata.obj$startyear))){
 # get domaine estimator for biomasses in each size category - Domain.estimates(data, Strata, Domain, strata.obj, domain.obj, Nd = NULL
 source("E:/INSHORE SCALLOP/BoF/Assessment_fns/SFA29W/Domainestimates.R")
 scall.dom.w.IPR <- Domain.estimates(w$pre, w$STRATA.ID.OLD, w$STRATA.ID.NEW, strata.obj, domain.obj)
@@ -250,13 +252,13 @@ scall.sum.n.IPR <- summary.domain.est(scall.dom.n.IPR)
 scall.sum.n.IR <- summary.domain.est(scall.dom.n.IR)
 scall.sum.n.I <- summary.domain.est(scall.dom.n.I)
 
-out[m,seq(3, 13, 2)] <- as.numeric(c(scall.sum.w.IPR[[2]][2],
+out.domain[m,seq(3, 13, 2)] <- as.numeric(c(scall.sum.w.IPR[[2]][2],
                                      scall.sum.w.IR[[2]][2],
                                      scall.sum.w.I[[2]][2],
                                      scall.sum.n.IPR[[2]][2],
                                      scall.sum.n.IR[[2]][2],
                                      scall.sum.n.I[[2]][2]))
-out[m,seq(4, 14, 2)] <- as.numeric(c(scall.sum.w.IPR[[2]][3],
+out.domain[m,seq(4, 14, 2)] <- as.numeric(c(scall.sum.w.IPR[[2]][3],
                                      scall.sum.w.IR[[2]][3],
                                      scall.sum.w.I[[2]][3],
                                      scall.sum.n.IPR[[2]][3],
@@ -298,6 +300,30 @@ scall.levels.n.IPR[[m]] <- scall.levels.n.IPR
 scall.levels.n.IR[[m]] <- scall.levels.n.IR
 scall.levels.n.I[[m]] <- scall.levels.n.I
 
+out.domain ### THIS CONTAINS STRATIFIED ESTIMATES. NO NEED TO RUN PEDSTRATA AGAIN!
+
+# So we can throw the appropriate biomass values into Strata.obj$I, IR, and IPR
+Strata.obj$I[[i]] <- out.domain$yst.w.I[i]
+Strata.obj$IR[[i]] <- out.domain$yst.w.IR[i]
+Strata.obj$IPR[[i]] <- out.domain$yst.w.IPR[i]
+
+# So we can throw the appropriate count values into Strata.obj$N, NR, and NPR
+Strata.obj$N[[i]] <- out.domain$yst.n.I[i]
+Strata.obj$NR[[i]] <- out.domain$yst.n.IR[i]
+Strata.obj$NPR[[i]] <- out.domain$yst.n.IPR[i]
+
+# total number of tows
+strat.res$n[i] <- sum(scall.dom.w.I$nh)
+
+# summary of stratified design, returns a number of useful survey design results and optimization summaries.
+I.tmp <- summary(scall.dom.w.I)
+# Convert to Biomass estiamte for the bank in tonnes
+
+
+}
+
+if(years[i] == max(unique(HSIstrata.obj$startyear)) | years[i] > max(unique(HSIstrata.obj$startyear))) {
+  
 # Strata calculations for biomass for commerical size Scallops
 Strata.obj$I[[i]] <- PEDstrata(w, HSIstrata.obj,'STRATA.ID',w$com)
 # total number of tows
@@ -306,7 +332,7 @@ strat.res$n[i] <- sum(Strata.obj$I[[i]]$nh)
 I.tmp <- summary(Strata.obj$I[[i]],effic=T)
 # Convert to Biomass estiamte for the bank in tonnes
 
-strat.res$I[i] <- I.tmp$yst * sum(N.tu)/10^6			#g to t
+strat.res$I[i] <- I.tmp$yst * sum(N.tu[c(1,3,5,7,9)])/10^6			#g to t
 # Calculate the CV, 'str' is the stratified CV, the 'ran' option gives the random design CV.
 if(err=='str') strat.res$I.cv[i] <- I.tmp$se.yst / I.tmp$yst
 # Note here that the variance from the summary is more like a variance of an s.e. rather than a variance of a s.d.
@@ -360,31 +386,9 @@ strat.res$l.bar[i] <- sum((n.yst[i,]*seq(2.5,200,5))[which(mw.bin==CS[i]):which(
 strat.res$l.k[i] <- sum((n.yst[i,]*seq(2.5,200,5))[which(mw.bin==RS[i]):which(mw.bin==CS[i]-5)]) / 
   sum(n.yst[i,which(mw.bin==RS[i]):which(mw.bin==CS[i]-5)])
 
-
-################ from 29W
-# scall.dom <- Domain.estimates(data.obj.i$STDTOTALCAUGHT, data.obj.i$Start.Bottom, data.obj.i$SDM, strata.bottomtypeandzone.A, strata.group.i)
-# scall.est.A[[m]] <- c(YR=year[i], SUBAREA=subarea, scall.dom)
-# scall.sum <- summary.domain.est(scall.dom)
-# out[m,(3:4)] <- as.numeric(c(scall.sum[[2]][2],scall.sum[[2]][3]))
-# 
-# scall.levels.A <- with(scall.dom,data.frame(ybd=(unlist(ybd)),var.ybd=(unlist(var.ybd)),var.diffdomain=(unlist(var.diffdomain)),se.ybd=(unlist(se.ybd)) ))
-# scall.levels.A$LEVEL <- row.names(scall.levels.A) 
-# scall.levels.A$YEAR <- rep(year[i],3)
-# scall.levels.A$SUBAREA <- rep(subarea,3)
-# scall.levels.A.2005to2007[[m]] <- scall.levels.A 
-# ################ from 29W
-# 
-# if(bnk=="Sab"){
-#   
-#   
-#   # Strata calculations for biomass for commerical size Scallops
-#   Strata.obj$I[[i]] <- Domain.estimates(w, HSIstrata.obj,'STRATA.ID',w$com)
-#   
-
 # Calculate the mean abundance and mean biomass (grams) per tow (for each NEW strata. (ybar_h)
 n.stratmeans[[i]] <- with(num, sapply(1:40, function(x){tapply(num[,x],STRATA.ID.NEW,mean)}))
 w.stratmeans[[i]] <- with(w, sapply(1:40, function(x){tapply(w[,x],STRATA.ID.NEW,mean)}))
-
 
 #Multiply the mean abundance(biomass) in each shell height category in a strata by the proportion of towable area
 #in that strata.  Sum this product for each strata resulting in an estimate of total abundance (biomass) for each
@@ -397,6 +401,10 @@ n.Yst <- n.yst[i,] * sum(N.tu)
 if(is.null(nrow(w.stratmeans[[i]])))  w.yst[i,] <- w.stratmeans[[i]]
 if(!is.null(nrow(w.stratmeans[[i]]))) w.yst[i,] <- apply(sapply(1:nrow(w.stratmeans[[i]]), function(x){w.stratmeans[[i]][x,] * pstrat[x]}),1,sum)
 w.Yst <- w.yst[i,] * sum(N.tu)
+}
+
+# By this point, we should have matching df's whether it's pre re-stratification or post, so we can go back to treating them the same way from here on.
+
 
 }
 
