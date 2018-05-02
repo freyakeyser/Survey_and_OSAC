@@ -724,13 +724,23 @@ years <- yr.start:yr
 		  lined.survey.obj$model.dat$RS <- RS
 		}# end if(bnk == "Ger")
 		  
-		# Get the survey estimates for the banks for which we have strata. ### FKSABLENOTE ##
+		# Get the survey estimates for the banks for which we have strata. 
 		if(bnk != "Ger" && bnk != "Mid" && bnk != "GB") 
 		  {
+		  
+		  if(bnk="Sab")  {
+		    survey.obj[[bnk]] <- survey.dat.restrat(surv.Rand[[bnk]], RS=RS, CS=CS, 
+		                                bk=bnk, areas=strata.areas, mw.par="CF",user.bins = bin)	
+		    clap.survey.obj[[bnk]] <- survey.dat.restrat(surv.Clap.Rand[[bnk]],SpatHtWt.fit[[bnk]], RS=RS, CS= CS, 
+		                                bk=bnk, areas=strata.areas, mw.par="CF",user.bins = bin)		
+		    }
+		    
+		  if(!bnk="Sab"){  
 		    survey.obj[[bnk]] <- survey.dat(surv.Rand[[bnk]], RS=RS, CS=CS, 
 		                                bk=bnk, areas=strata.areas, mw.par="CF",user.bins = bin)	
 		    clap.survey.obj[[bnk]] <- survey.dat(surv.Clap.Rand[[bnk]],SpatHtWt.fit[[bnk]], RS=RS, CS= CS, 
-		                                  bk=bnk, areas=strata.areas, mw.par="CF",user.bins = bin)		
+		                                  bk=bnk, areas=strata.areas, mw.par="CF",user.bins = bin)
+		  }
 	
 		    survey.obj[[bnk]][[1]]$CF <- na.omit(sapply(1:length(years),
 		                                    function(x){with(subset(surv.Rand[[bnk]],year == years[x]),

@@ -50,6 +50,11 @@
 survey.dat <- function(shf, htwt.fit, years, RS=80, CS=100, bk="GBa", areas,  mw.par='annual',err='str',user.bins = NULL)
 {
   
+  # Sable gets special treatment due to restratification, so do NOT use survey.dat on it. Must use survey.dat.restrat
+  if(bnk=="Sab"){
+    print("Something's wrong in SurveySummary_data.r because you should be running survey.dat.restrat for Sable, not survey.dat")
+  }	
+  
   # load the PEDstrata package, note this is a locally developed package not available from R repositories
 	require(PEDstrata)  || stop("PEDstrata package required please obtain a copy and install this locally developed package")
 	require(survey)     || stop("survey package required please install package and try again")
@@ -148,80 +153,6 @@ survey.dat <- function(shf, htwt.fit, years, RS=80, CS=100, bk="GBa", areas,  mw
 	  
 	  if(mw.par !='annual' && mw.par !='fixed') mw[[i]]<-sweep(matrix((seq(2.5,200,5)/100)^3,nrow(ann.dat),
 	                                                                  40,byrow=T,dimnames=list(ann.dat$tow,mw.bin)),1,FUN='*',ann.dat[,mw.par])
-	  
-	  # Make a dataframe subseting the shf data, select the current year and all the bins, add a column with the strata ID's
-	  # must treat Sable special due to restratification
-	  if(bnk=="Sab"){
-	    num <- data.frame(subset(shf, year==years[i], which(bin==5):which(bin==200)), 
-	                          STRATA.ID.NEW=shf$Strata_ID_new[shf$year==years[i]],
-	                          STRATA.ID.OLD=shf$Strata_ID_old[shf$year==years[i]])
-	    
-	    # Remove rows with strata ID's which are NA's
-	    num<-na.omit(num)
-	    
-	    # Add up the numbers of Scallops in each size category.
-	    num$pre <- rowSums(num[, which(mw.bin==5):(which(mw.bin==RS[i])-1)],na.rm=T)
-	    num$rec <- rowSums(num[, which(mw.bin==RS[i]):(which(mw.bin==CS[i])-1)],na.rm=T)
-	    num$com <- rowSums(num[, which(mw.bin==CS[i]):which(mw.bin==200)],na.rm=T)
-	    
-	    # Make a dataframe with the biomasses for each bin and tow, add the strata ID's as well
-	    # This is in grams per tow
-	    w <- data.frame(subset(shf, year==years[i], which(bin==5):which(bin==200))*mw[[i]], 
-	                    STRATA.ID.NEW=shf$Strata_ID_new[shf$year==years[i]],
-	                    STRATA.ID.OLD=shf$Strata_ID_old[shf$year==years[i]])
-	    # Remove any rows in which the strata is NA
-	    w<-na.omit(w)
-	    # Add up the biomass of Scallops in each size category, again this is in grams per tow
-	    w$pre <- rowSums(w[, which(mw.bin==5):(which(mw.bin==RS[i])-1)],na.rm=T)
-	    w$rec <- rowSums(w[, which(mw.bin==RS[i]):(which(mw.bin==CS[i])-1)],na.rm=T)
-	    w$com <- rowSums(w[, which(mw.bin==CS[i]):which(mw.bin==200)],na.rm=T)
-	    
-	    # The proportion of towable area in each strata.
-	    # run HSIstrata.obj to remind yourself of the years for each
-	    pstrat_new <- as.numeric(N.tu[c(1,3,5,7,9)]/sum(N.tu[c(1,3,5,7,9)]))
-	    pstrat_old <- as.numeric(N.tu[c(2,4,6,8,10)]/sum(N.tu[c(2,4,6,8,10)]))
-	    
-	    # Calculate the mean abundance and mean biomass (grams) per tow (for each NEW strata. (ybar_h)
-	    n.stratmeans[[i]] <- with(num, sapply(1:40, function(x){tapply(num[,x],STRATA.ID.NEW,mean)}))
-	    w.stratmeans[[i]] <- with(w, sapply(1:40, function(x){tapply(w[,x],STRATA.ID.NEW,mean)}))
-	    
-	    
-	    ### do i have to do this for old as well?? START HERE WEDNESDAY!
-	    
-	    
-	    
-	    #Multiply the mean abundance(biomass) in each shell height category in a strata by the proportion of towable area
-	    #in that strata.  Sum this product for each strata resulting in an estimate of total abundance (biomass) for each
-	    #shell height category in a given year. (ybar_st)
-	    if(is.null(nrow(n.stratmeans[[i]]))) n.yst[i,] <- n.stratmeans[[i]]
-	    if(!is.null(nrow(n.stratmeans[[i]]))) n.yst[i,] <- apply(sapply(1:nrow(n.stratmeans[[i]]), function(x){n.stratmeans[[i]][x,] * pstrat[x]}),1,sum)
-	    #  Now multiply by the total bank area to determine the survey estimated abundance(biomass).
-	    # The abundance is actual numbers 
-	    n.Yst <- n.yst[i,] * sum(N.tu) 
-	    if(is.null(nrow(w.stratmeans[[i]])))  w.yst[i,] <- w.stratmeans[[i]]
-	    if(!is.null(nrow(w.stratmeans[[i]]))) w.yst[i,] <- apply(sapply(1:nrow(w.stratmeans[[i]]), function(x){w.stratmeans[[i]][x,] * pstrat[x]}),1,sum)
-	    w.Yst <- w.yst[i,] * sum(N.tu)
-	    }	  ################ from 29W
-	  # scall.dom <- Domain.estimates(data.obj.i$STDTOTALCAUGHT, data.obj.i$Start.Bottom, data.obj.i$SDM, strata.bottomtypeandzone.A, strata.group.i)
-	  # scall.est.A[[m]] <- c(YR=year[i], SUBAREA=subarea, scall.dom)
-	  # scall.sum <- summary.domain.est(scall.dom)
-	  # out[m,(3:4)] <- as.numeric(c(scall.sum[[2]][2],scall.sum[[2]][3]))
-	  # 
-	  # scall.levels.A <- with(scall.dom,data.frame(ybd=(unlist(ybd)),var.ybd=(unlist(var.ybd)),var.diffdomain=(unlist(var.diffdomain)),se.ybd=(unlist(se.ybd)) ))
-	  # scall.levels.A$LEVEL <- row.names(scall.levels.A) 
-	  # scall.levels.A$YEAR <- rep(year[i],3)
-	  # scall.levels.A$SUBAREA <- rep(subarea,3)
-	  # scall.levels.A.2005to2007[[m]] <- scall.levels.A 
-	  # ################ from 29W
-	  # 
-	  # if(bnk=="Sab"){
-	  #   
-	  #   
-	  #   # Strata calculations for biomass for commerical size Scallops
-	  #   Strata.obj$I[[i]] <- Domain.estimates(w, HSIstrata.obj,'STRATA.ID',w$com)
-	  #   
-	  # }
-	  
 	  
 	  if(!bnk=="Sab"){
 	  num <- data.frame(subset(shf, year==years[i], which(bin==5):which(bin==200)), 
