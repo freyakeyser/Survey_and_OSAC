@@ -124,6 +124,7 @@ source(paste(direct,"Assessment_fns/Survey_and_OSAC/condFac.r",sep=""))
 source(paste(direct,"Assessment_fns/Survey_and_OSAC/assign_strata.r",sep=""),local=T) 
 
 source(paste(direct,"Assessment_fns/Survey_and_OSAC/survey.dat.r",sep="")) 
+source(paste(direct,"Assessment_fns/Survey_and_OSAC/survey.dat.restrat.r",sep="")) 
 source(paste(direct,"Assessment_fns/Survey_and_OSAC/sprSurv.r",sep="")) 
 source(paste(direct,"Assessment_fns/Survey_and_OSAC/surv.by.tow.r",sep="")) 
 source(paste(direct,"Assessment_fns/Survey_and_OSAC/simple.surv.r",sep="")) 
@@ -411,6 +412,7 @@ years <- yr.start:yr
     # Assign the strat based on location, the "new_strata" column is used for processing later on in the function so I've retained it.
     # We used to write to the screen what percentage of strata were reassigned. But the strata are now entered as NULL so it'll always be 100%
     # German and Middle bank have no stratifcation scheme and we don't do this for GB spring which is fixed stations.
+    # Sable has to be handled differently so that we assign the old and new strata (pre and post WEBCA). Note that since Sable has been restratified, some tows are now outside of the strata bounds and marked as NA.
     if(bnk == "Sab") {
       strata.years <- unique(detail.poly.surv[detail.poly.surv$label==bnk,]$startyear)
       nrestrat <- length(strata.years)
@@ -427,8 +429,8 @@ years <- yr.start:yr
     }
       
     if(bnk != "Ger" && bnk != "Mid"  && bnk != "GB" && bnk!= "Sab") bank.dat[[bnk]] <- assign.strata(bank.dat[[bnk]],detail.poly.surv)
-    # above assigns strata to each tow. Note that since Sable has been restratified, some tows are now outside of the strata bounds and marked as NA.
-
+    # above assigns strata to each tow. 
+    
 		# MEAT WEIGHT DATA from 2011-current
 		# Get the mw data from 2011 to this year
     if(bnk != "GB" && bnk != "GBa" && bnk != "GBb") mw[[bnk]] <- subset(MW.dat.new,bank==bnk)
