@@ -98,29 +98,29 @@ N.tu <- HSIstrata.obj$NH
 # for easier indexing of shell height bins in shf
 bin <- as.numeric(substr(names(shf),2,nchar(names(shf))))
 
-# And make some more objects if we have user specified bins...
-if(!is.null(user.bins))
+# And make some more objects if we have user specified bins
+if(!is.null(user.bins)) 
 {
   # Get the names for the user bins and good names for the final results...
   bnames <- paste0("bin_lt_",user.bins[1])
   mean.names <- paste0("mean_lt_",user.bins[1])
   CV.names <- paste0("CV_lt_",user.bins[1])
-  for(p in 1:length(user.bins)+1) 
+  for(p in 1:length(user.bins)+1)
   {
-    if(p > 1 && p < length(user.bins)+1) 
+    if(p > 1 && p < length(user.bins)+1)
     {
       bnames[p] <- paste0("bin_",user.bins[p-1],"-",user.bins[p])
       mean.names[p] <- paste0("mean_",user.bins[p-1],"-",user.bins[p])
       CV.names[p] <- paste0("CV_",user.bins[p-1],"-",user.bins[p])
-    } # end if(p > 1 && p < length(user.bins)+1) 
-    
-    if(p == length(user.bins)+1) 
+    } # end if(p > 1 && p < length(user.bins)+1)
+
+    if(p == length(user.bins)+1)
     {
       bnames[p] <- paste0("bin_",user.bins[p-1],"_plus")
       mean.names[p] <- paste0("mean_",user.bins[p-1],"_plus")
       CV.names[p] <- paste0("CV_",user.bins[p-1],"_plus")
-    } # end if(p == length(user.bins)+1) 
-  } # End for(p in 1:length(user.bins)+1) 
+    } # end if(p == length(user.bins)+1)
+  } # End for(p in 1:length(user.bins)+1)
   bnames <- c(bnames,paste0(bnames,"_bm"))
   mean.names <- c(mean.names,paste0(mean.names,"_bm"))
   CV.names <- c(CV.names,paste0(CV.names,"_bm"))
@@ -224,6 +224,8 @@ w$com <- rowSums(w[, which(mw.bin==CS[i]):which(mw.bin==200)],na.rm=T)
 pstrat_new <- as.numeric(N.tu[c(1,3,5,7,9)]/sum(N.tu[c(1,3,5,7,9)]))
 pstrat_old <- as.numeric(N.tu[c(2,4,6,8,10)]/sum(N.tu[c(2,4,6,8,10)]))
 
+pstrat_new <- data.frame(prop=c(pstrat_new, NA), strata_id=c(paste0(501:505, "_2.0"), "NA_2.0"))
+
 # Calculate the mean abundance and mean biomass (grams) per tow (for each NEW strata. (ybar_h)
 n.stratmeans[[i]] <- with(num, sapply(1:40, function(x){tapply(num[,x],STRATA.ID.NEW,mean)}))
 w.stratmeans[[i]] <- with(w, sapply(1:40, function(x){tapply(w[,x],STRATA.ID.NEW,mean)}))
@@ -231,13 +233,13 @@ w.stratmeans[[i]] <- with(w, sapply(1:40, function(x){tapply(w[,x],STRATA.ID.NEW
 #Multiply the mean abundance(biomass) in each shell height category in a strata by the proportion of towable area
 #in that strata.  Sum this product for each strata resulting in an estimate of total abundance (biomass) for each
 #shell height category in a given year. (ybar_st)
-if(is.null(nrow(n.stratmeans[[i]]))) n.yst[i,] <- n.stratmeans[[i]]
-if(!is.null(nrow(n.stratmeans[[i]]))) n.yst[i,] <- apply(sapply(1:nrow(n.stratmeans[[i]]), function(x){n.stratmeans[[i]][x,] * pstrat[x]}),1,sum)
+if(is.null(nrow(n.stratmeans[[i]]))) n.yst[i,] <- NA
+if(!is.null(nrow(n.stratmeans[[i]]))) n.yst[i,] <- apply(X=sapply(1:nrow(n.stratmeans[[i]]), function(x){n.stratmeans[[i]][x,] * pstrat_new$prop[pstrat_new$strata_id %in% row.names(n.stratmeans[[i]])][x]}),MARGIN = 1, FUN = function(X) sum(X, na.rm=T))
 #  Now multiply by the total bank area to determine the survey estimated abundance(biomass).
 # The abundance is actual numbers 
 n.Yst <- n.yst[i,] * sum(N.tu[c(1,3,5,7,9)]) 
-if(is.null(nrow(w.stratmeans[[i]])))  w.yst[i,] <- w.stratmeans[[i]]
-if(!is.null(nrow(w.stratmeans[[i]]))) w.yst[i,] <- apply(sapply(1:nrow(w.stratmeans[[i]]), function(x){w.stratmeans[[i]][x,] * pstrat[x]}),1,sum)
+if(is.null(nrow(w.stratmeans[[i]])))  w.yst[i,] <- NA
+if(!is.null(nrow(w.stratmeans[[i]]))) w.yst[i,] <- apply(X=sapply(1:nrow(w.stratmeans[[i]]), function(x){w.stratmeans[[i]][x,] * pstrat_new$prop[pstrat_new$strata_id %in% row.names(n.stratmeans[[i]])][x]}),MARGIN=1, FUN = function(X) sum(X, na.rm=T))
 w.Yst <- w.yst[i,] * sum(N.tu[c(1,3,5,7,9)])
 
 # restratification occurs for all years < 2018
@@ -260,13 +262,13 @@ scall.est.n.IPR[[m]] <- c(YR=years[i], bank=bnk, scall.dom.n.IPR)
 scall.est.n.IR[[m]] <- c(YR=years[i], bank=bnk, scall.dom.n.IR)
 scall.est.n.I[[m]] <- c(YR=years[i], bank=bnk, scall.dom.n.I)
 
-scall.sum.w.IPR <- summary.domain.est(scall.dom.w.IPR)
-scall.sum.w.IR <- summary.domain.est(scall.dom.w.IR)
-scall.sum.w.I <- summary.domain.est(scall.dom.w.I)
-
-scall.sum.n.IPR <- summary.domain.est(scall.dom.n.IPR)
-scall.sum.n.IR <- summary.domain.est(scall.dom.n.IR)
-scall.sum.n.I <- summary.domain.est(scall.dom.n.I)
+# summary of stratified design, returns a number of useful survey design results and optimization summaries.
+IPR.tmp <- summary.domain.est(scall.dom.w.IPR)
+IR.tmp <- summary.domain.est(scall.dom.w.IR)
+I.tmp <- summary.domain.est(scall.dom.w.I)
+NPR.tmp <- summary.domain.est(scall.dom.n.IPR)
+NR.tmp <- summary.domain.est(scall.dom.n.IR)
+N.tmp <- summary.domain.est(scall.dom.n.I)
 
 out.domain[m,seq(3, 13, 2)] <- as.numeric(c(scall.sum.w.IPR[[2]][2],
                                      scall.sum.w.IR[[2]][2],
@@ -331,13 +333,6 @@ Strata.obj$NPR[[i]] <- out.domain$yst.n.IPR[i]
 # total number of tows
 strat.res$n[i] <- sum(scall.dom.w.I$nh)
 
-# summary of stratified design, returns a number of useful survey design results and optimization summaries.
-I.tmp <- summary(scall.dom.w.I, effic=T)
-IR.tmp <- summary(scall.dom.w.IR, effic=T)
-IPR.tmp <- summary(scall.dom.w.IPR, effic=T)
-N.tmp <- summary(scall.dom.n.I, effic=T)
-NR.tmp <- summary(scall.dom.n.IR, effic=T)
-NPR.tmp <- summary(scall.dom.n.IPR, effic=T)
 }# end if(years[i] < year of restratification )
 
 if(years[i] == max(unique(HSIstrata.obj$startyear)) | years[i] > max(unique(HSIstrata.obj$startyear))) {
@@ -401,50 +396,50 @@ strat.res$w.k[i] <- sum(w.yst[i,which(mw.bin==RS[i]):which(mw.bin==CS[i]-5)]) /
 
 # By this point, we should have matching df's whether it's pre re-stratification or post, so we can go back to treating them the same way from here on.
 
-# So I need to get the results for the user specified SH bins if they are requested. ## FK: for now, I'm turning off this option. 
-if(!is.null(user.bins)) print("Sorry, you gotta use the assigned bins for now. Maybe someday...")
-# {
-#   # Now get the annual estimate for each of our user bins.
-#   user.bin.res <- NULL
-#   for(k in 1:(length(user.bins)+1))
-#   {
-#     # Here's the results by bin, non-stratified at the moment!
-#     if(k == 1) 
-#     {
-#       # The abundance and biomass of the smallest user specified size bin
-#       user.bin.res[[bnames[k]]]  <- rowSums(num[, which(mw.bin==5):which(mw.bin==user.bins[k])],na.rm=T)
-#       user.bin.res[[bnames[k+length(user.bins)+1]]] <- rowSums(w[, which(mw.bin==5):which(mw.bin==user.bins[k])],na.rm=T)
-#     } #end if(k == 1)
-#     # For the middle size categories
-#     if(k > 1 && k <= length(user.bins))
-#     {
-#       # The abundance and biomass of the smallest user specified size bin
-#       user.bin.res[[bnames[k]]]  <- rowSums(num[, which(mw.bin==user.bins[k-1]+5):which(mw.bin==user.bins[k])],na.rm=T)
-#       user.bin.res[[bnames[k+length(user.bins)+1]]] <- rowSums(w[, which(mw.bin==user.bins[k-1]+5):which(mw.bin==user.bins[k])],na.rm=T)
-#     } # end if(k > 1 && k <= length(user.bins))
-#     # And finally the largest size categories
-#     if(k == (length(user.bins)+1))
-#     {
-#       # The abundance and biomass of the smallest user specified size bin
-#       user.bin.res[[bnames[k]]]  <-  rowSums(num[, which(mw.bin==user.bins[k-1]+5):which(mw.bin==200)],na.rm=T)
-#       user.bin.res[[bnames[k+length(user.bins)+1]]] <- rowSums(w[, which(mw.bin==user.bins[k-1]+5):which(mw.bin==200)],na.rm=T)
-#     } # end if(k == (length(user.bins)+1))
-#     
-#     # Now we can get the stratified survey estimates...
-#     
-#   }# end for(k in 1:length(user.bins)+1)) 
-#   
-#   # Now we can get the stratified results... ## NOT RESTRATIFIED!
-#   for(m in 1:length(mean.names))
-#   {
-#     # The stratified calculation/object
-#     res.tmp <- summary(PEDstrata(w, HSIstrata.obj,'STRATA.ID', user.bin.res[[bnames[m]]]),effic=T)
-#     tmp[i,mean.names[m]] <-  res.tmp$yst* sum(N.tu)/10^6			# in millions or tonnes...
-#     # Strata calculations for biomass for pre-recruit sized Scallops
-#     if(err=='str') tmp[i,CV.names[m]] <- res.tmp$se.yst /  res.tmp$yst
-#     if(err=='ran') tmp[i,CV.names[m]] <- sqrt(res.tmp$var.ran) /  res.tmp$yst
-#   } # end for(m in 1:length(mean.names))
-# } # end if(!is.null(user.bins))
+# So I need to get the results for the user specified SH bins if they are requested.  
+if(!is.null(user.bins))
+{
+  # Now get the annual estimate for each of our user bins.
+  user.bin.res <- NULL
+  for(k in 1:(length(user.bins)+1))
+  {
+    # Here's the results by bin, non-stratified at the moment!
+    if(k == 1)
+    {
+      # The abundance and biomass of the smallest user specified size bin
+      user.bin.res[[bnames[k]]]  <- rowSums(num[, which(mw.bin==5):which(mw.bin==user.bins[k])],na.rm=T)
+      user.bin.res[[bnames[k+length(user.bins)+1]]] <- rowSums(w[, which(mw.bin==5):which(mw.bin==user.bins[k])],na.rm=T)
+    } #end if(k == 1)
+    # For the middle size categories
+    if(k > 1 && k <= length(user.bins))
+    {
+      # The abundance and biomass of the smallest user specified size bin
+      user.bin.res[[bnames[k]]]  <- rowSums(num[, which(mw.bin==user.bins[k-1]+5):which(mw.bin==user.bins[k])],na.rm=T)
+      user.bin.res[[bnames[k+length(user.bins)+1]]] <- rowSums(w[, which(mw.bin==user.bins[k-1]+5):which(mw.bin==user.bins[k])],na.rm=T)
+    } # end if(k > 1 && k <= length(user.bins))
+    # And finally the largest size categories
+    if(k == (length(user.bins)+1))
+    {
+      # The abundance and biomass of the smallest user specified size bin
+      user.bin.res[[bnames[k]]]  <-  rowSums(num[, which(mw.bin==user.bins[k-1]+5):which(mw.bin==200)],na.rm=T)
+      user.bin.res[[bnames[k+length(user.bins)+1]]] <- rowSums(w[, which(mw.bin==user.bins[k-1]+5):which(mw.bin==200)],na.rm=T)
+    } # end if(k == (length(user.bins)+1))
+
+    # Now we can get the stratified survey estimates...
+
+  }# end for(k in 1:length(user.bins)+1))
+
+  # Now we can get the stratified results... ## NOT RESTRATIFIED!
+  for(m in 1:length(mean.names))
+  {
+    # The stratified calculation/object
+    res.tmp <- summary(PEDstrata(w, HSIstrata.obj,'STRATA.ID', user.bin.res[[bnames[m]]]),effic=T)
+    tmp[i,mean.names[m]] <-  res.tmp$yst* sum(N.tu)/10^6			# in millions or tonnes...
+    # Strata calculations for biomass for pre-recruit sized Scallops
+    if(err=='str') tmp[i,CV.names[m]] <- res.tmp$se.yst /  res.tmp$yst
+    if(err=='ran') tmp[i,CV.names[m]] <- sqrt(res.tmp$var.ran) /  res.tmp$yst
+  } # end for(m in 1:length(mean.names))
+} # end if(!is.null(user.bins))
 
     }# end for(i in 1:length(years))
   
