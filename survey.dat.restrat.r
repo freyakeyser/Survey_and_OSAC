@@ -145,6 +145,21 @@ scall.est.w.I <- NULL
 scall.est.n.IPR <- NULL
 scall.est.n.IR <- NULL
 scall.est.n.I <- NULL
+out <- data.frame(YEAR=years,BANK=bnk,
+                  yst.w.IPR=rep(NA,length(years)),
+                  var.yst.w.IPR=rep(NA,length(years)),
+                  yst.w.IR=rep(NA,length(years)),
+                  var.yst.w.IR=rep(NA,length(years)),
+                  yst.w.I=rep(NA,length(years)),
+                  var.yst.w.I=rep(NA,length(years)),
+                  yst.n.IPR=rep(NA,length(years)),
+                  var.yst.n.IPR=rep(NA,length(years)),
+                  yst.n.IR=rep(NA,length(years)),
+                  var.yst.n.IR=rep(NA,length(years)),
+                  yst.n.I=rep(NA,length(years)),
+                  var.yst.n.I=rep(NA,length(years)),
+                  descrip=rep('domain',length(years))) 
+
 
 # If CS and RS are just one value turn them into a vector the same length as the number of years of data.
 if(length(CS) == 1)	CS <- rep(CS, length(years))
@@ -235,13 +250,53 @@ scall.sum.n.IPR <- summary.domain.est(scall.dom.n.IPR)
 scall.sum.n.IR <- summary.domain.est(scall.dom.n.IR)
 scall.sum.n.I <- summary.domain.est(scall.dom.n.I)
 
-out[m,(3:4)] <- as.numeric(c(scall.sum[[2]][2],scall.sum[[2]][3]))
+out[m,seq(3, 13, 2)] <- as.numeric(c(scall.sum.w.IPR[[2]][2],
+                                     scall.sum.w.IR[[2]][2],
+                                     scall.sum.w.I[[2]][2],
+                                     scall.sum.n.IPR[[2]][2],
+                                     scall.sum.n.IR[[2]][2],
+                                     scall.sum.n.I[[2]][2]))
+out[m,seq(4, 14, 2)] <- as.numeric(c(scall.sum.w.IPR[[2]][3],
+                                     scall.sum.w.IR[[2]][3],
+                                     scall.sum.w.I[[2]][3],
+                                     scall.sum.n.IPR[[2]][3],
+                                     scall.sum.n.IR[[2]][3],
+                                     scall.sum.n.I[[2]][3]))
 
-scall.levels.A <- with(scall.dom,data.frame(ybd=(unlist(ybd)),var.ybd=(unlist(var.ybd)),var.diffdomain=(unlist(var.diffdomain)),se.ybd=(unlist(se.ybd)) ))
-scall.levels.A$LEVEL <- row.names(scall.levels.A) 
-scall.levels.A$YEAR <- rep(year[i],3)
-scall.levels.A$SUBAREA <- rep(subarea,3)
-scall.levels.A.2005to2007[[m]] <- scall.levels.A 
+scall.levels.w.IPR <- with(scall.dom.w.IPR,data.frame(ybd=(unlist(ybd)),var.ybd=(unlist(var.ybd)),var.diffdomain=(unlist(var.diffdomain)),se.ybd=(unlist(se.ybd)) ))
+scall.levels.w.IR <- with(scall.dom.w.IR,data.frame(ybd=(unlist(ybd)),var.ybd=(unlist(var.ybd)),var.diffdomain=(unlist(var.diffdomain)),se.ybd=(unlist(se.ybd)) ))
+scall.levels.w.I <- with(scall.dom.w.I,data.frame(ybd=(unlist(ybd)),var.ybd=(unlist(var.ybd)),var.diffdomain=(unlist(var.diffdomain)),se.ybd=(unlist(se.ybd)) ))
+scall.levels.n.IPR <- with(scall.dom.n.IPR,data.frame(ybd=(unlist(ybd)),var.ybd=(unlist(var.ybd)),var.diffdomain=(unlist(var.diffdomain)),se.ybd=(unlist(se.ybd)) ))
+scall.levels.n.IR <- with(scall.dom.n.IR,data.frame(ybd=(unlist(ybd)),var.ybd=(unlist(var.ybd)),var.diffdomain=(unlist(var.diffdomain)),se.ybd=(unlist(se.ybd)) ))
+scall.levels.n.I <- with(scall.dom.n.I,data.frame(ybd=(unlist(ybd)),var.ybd=(unlist(var.ybd)),var.diffdomain=(unlist(var.diffdomain)),se.ybd=(unlist(se.ybd)) ))
+
+scall.levels.w.IPR$LEVEL <- row.names(scall.levels.w.IPR)
+scall.levels.w.IR$LEVEL <- row.names(scall.levels.w.IPR)
+scall.levels.w.I$LEVEL <- row.names(scall.levels.w.IPR) 
+scall.levels.n.IPR$LEVEL <- row.names(scall.levels.w.IPR)
+scall.levels.n.IR$LEVEL <- row.names(scall.levels.w.IPR)
+scall.levels.n.I$LEVEL <- row.names(scall.levels.w.IPR)
+
+scall.levels.w.IPR$YEAR <- rep(years[i],dim(scall.levels.w.IPR)[1])
+scall.levels.w.IR$YEAR <- rep(years[i],dim(scall.levels.w.IR)[1])
+scall.levels.w.I$YEAR <- rep(years[i],dim(scall.levels.w.I)[1])
+scall.levels.n.IPR$YEAR <- rep(years[i],dim(scall.levels.n.IPR)[1])
+scall.levels.n.IR$YEAR <- rep(years[i],dim(scall.levels.n.IR)[1])
+scall.levels.n.I$YEAR <- rep(years[i],dim(scall.levels.n.I)[1])
+
+scall.levels.w.IPR$BANK <- rep(bnk,dim(scall.levels.w.IPR)[1])
+scall.levels.w.IR$BANK <- rep(bnk,dim(scall.levels.w.IR)[1])
+scall.levels.w.I$BANK <- rep(bnk,dim(scall.levels.w.I)[1])
+scall.levels.n.IPR$YEAR <- rep(bnk,dim(scall.levels.n.IPR)[1])
+scall.levels.n.IR$YEAR <- rep(bnk,dim(scall.levels.n.IR)[1])
+scall.levels.n.I$YEAR <- rep(bnk,dim(scall.levels.n.I)[1])
+
+scall.levels.w.IPR[[m]] <- scall.levels.w.IPR
+scall.levels.w.IR[[m]] <- scall.levels.w.IR
+scall.levels.w.I[[m]] <- scall.levels.w.I
+scall.levels.n.IPR[[m]] <- scall.levels.n.IPR
+scall.levels.n.IR[[m]] <- scall.levels.n.IR
+scall.levels.n.I[[m]] <- scall.levels.n.I
 
 # Strata calculations for biomass for commerical size Scallops
 Strata.obj$I[[i]] <- PEDstrata(w, HSIstrata.obj,'STRATA.ID',w$com)
