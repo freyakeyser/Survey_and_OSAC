@@ -49,9 +49,9 @@
 
 survey.dat.restrat <- function(shf, htwt.fit, years, RS=80, CS=100, bk="Sab", areas,  mw.par='annual',err='str',user.bins = NULL) {
 
-  if(!bnk=="Sab") print("You wound up in survey.dat.restrat even though your bank shouldn't be restratified. How did you get here? 
+  if(!bk=="Sab") print("You wound up in survey.dat.restrat even though your bank shouldn't be restratified. How did you get here? 
                         Please return to SurveySummary_data.r")
-  if(bnk=="Sab"){
+  if(bk=="Sab"){
 # load the PEDstrata package, note this is a locally developed package not available from R repositories
 require(PEDstrata)  || stop("PEDstrata package required please obtain a copy and install this locally developed package")
 require(survey)     || stop("survey package required please install package and try again")
@@ -145,7 +145,7 @@ scall.est.w.I <- NULL
 scall.est.n.IPR <- NULL
 scall.est.n.IR <- NULL
 scall.est.n.I <- NULL
-out.domain <- data.frame(YEAR=years,BANK=bnk,
+out.domain <- data.frame(YEAR=years,BANK=bk,
                   yst.w.IPR=rep(NA,length(years)),
                   var.yst.w.IPR=rep(NA,length(years)),
                   yst.w.IR=rep(NA,length(years)),
@@ -177,7 +177,7 @@ for(i in 1:length(years))
   ann.dat<-subset(shf,year==years[i])
   # Use the MW-SH model fit to calculate the meat weight, assumes that year was a random effect in the model
   # Remember mw is in grams here.
-  # FK had to specify htwt.fit <- SpatHtWt.fit[[bnk]]??
+  # FK had to specify htwt.fit <- SpatHtWt.fit[[bk]]??
   if(mw.par=='annual') mw[[i]] <- matrix(exp(log(seq(2.5,200,5))*htwt.fit$b[i]+log(htwt.fit$a[i])),
                                          nrow(ann.dat),40,byrow=T,dimnames=list(ann.dat$tow,mw.bin))
   # Use the MW-SH model fit to calculate the meat weight, assumes that year was not included in the model
@@ -254,13 +254,13 @@ scall.dom.n.IPR <- Domain.estimates(num$pre, num$STRATA.ID.OLD, num$STRATA.ID.NE
 scall.dom.n.IR <- Domain.estimates(num$rec, num$STRATA.ID.OLD, num$STRATA.ID.NEW, strata.obj, domain.obj)
 scall.dom.n.I <- Domain.estimates(num$com, num$STRATA.ID.OLD, num$STRATA.ID.NEW, strata.obj, domain.obj)
 
-scall.est.w.IPR[[m]] <- c(YR=years[i], bank=bnk, scall.dom.w.IPR)
-scall.est.w.IR[[m]] <- c(YR=years[i], bank=bnk, scall.dom.w.IR)
-scall.est.w.I[[m]] <- c(YR=years[i], bank=bnk, scall.dom.w.I)
+scall.est.w.IPR[[m]] <- c(YR=years[i], bank=bk, scall.dom.w.IPR)
+scall.est.w.IR[[m]] <- c(YR=years[i], bank=bk, scall.dom.w.IR)
+scall.est.w.I[[m]] <- c(YR=years[i], bank=bk, scall.dom.w.I)
 
-scall.est.n.IPR[[m]] <- c(YR=years[i], bank=bnk, scall.dom.n.IPR)
-scall.est.n.IR[[m]] <- c(YR=years[i], bank=bnk, scall.dom.n.IR)
-scall.est.n.I[[m]] <- c(YR=years[i], bank=bnk, scall.dom.n.I)
+scall.est.n.IPR[[m]] <- c(YR=years[i], bank=bk, scall.dom.n.IPR)
+scall.est.n.IR[[m]] <- c(YR=years[i], bank=bk, scall.dom.n.IR)
+scall.est.n.I[[m]] <- c(YR=years[i], bank=bk, scall.dom.n.I)
 
 # summary of stratified design, returns a number of useful survey design results and optimization summaries.
 IPR.tmp <- summary.domain.est(scall.dom.w.IPR)
@@ -304,12 +304,12 @@ scall.levels.n.IPR$YEAR <- rep(years[i],dim(scall.levels.n.IPR)[1])
 scall.levels.n.IR$YEAR <- rep(years[i],dim(scall.levels.n.IR)[1])
 scall.levels.n.I$YEAR <- rep(years[i],dim(scall.levels.n.I)[1])
 
-scall.levels.w.IPR$BANK <- rep(bnk,dim(scall.levels.w.IPR)[1])
-scall.levels.w.IR$BANK <- rep(bnk,dim(scall.levels.w.IR)[1])
-scall.levels.w.I$BANK <- rep(bnk,dim(scall.levels.w.I)[1])
-scall.levels.n.IPR$YEAR <- rep(bnk,dim(scall.levels.n.IPR)[1])
-scall.levels.n.IR$YEAR <- rep(bnk,dim(scall.levels.n.IR)[1])
-scall.levels.n.I$YEAR <- rep(bnk,dim(scall.levels.n.I)[1])
+scall.levels.w.IPR$BANK <- rep(bk,dim(scall.levels.w.IPR)[1])
+scall.levels.w.IR$BANK <- rep(bk,dim(scall.levels.w.IR)[1])
+scall.levels.w.I$BANK <- rep(bk,dim(scall.levels.w.I)[1])
+scall.levels.n.IPR$YEAR <- rep(bk,dim(scall.levels.n.IPR)[1])
+scall.levels.n.IR$YEAR <- rep(bk,dim(scall.levels.n.IR)[1])
+scall.levels.n.I$YEAR <- rep(bk,dim(scall.levels.n.I)[1])
 
 scall.levels.w.IPR[[m]] <- scall.levels.w.IPR
 scall.levels.w.IR[[m]] <- scall.levels.w.IR
@@ -454,7 +454,7 @@ strat.res$w.k[i] <- sum(w.yst[i,which(mw.bin==RS[i]):which(mw.bin==CS[i]-5)]) /
   if(is.null(user.bins)) return(list(model.dat=model.dat,shf.dat=shf.dat,Strata.obj=Strata.obj))
   if(!is.null(user.bins)) return(list(model.dat=model.dat,shf.dat=shf.dat,Strata.obj=Strata.obj,bin.names = bnames,user.bins = user.bins))
   
-  }# end if(bnk=="Sab")
+  }# end if(bk=="Sab")
   
   
 } # end survey.dat.restrat()
