@@ -730,14 +730,14 @@ years <- yr.start:yr
 		if(bnk != "Ger" && bnk != "Mid" && bnk != "GB") 
 		  {
 		  
-		  if(bnk="Sab")  {
-		    survey.obj[[bnk]] <- survey.dat.restrat(surv.Rand[[bnk]], RS=RS, CS=CS, 
+		  if(bnk=="Sab")  {
+		    survey.obj[[bnk]] <- survey.dat.restrat(shf=surv.Rand[[bnk]], RS=RS, CS=CS, 
 		                                bk=bnk, areas=strata.areas, mw.par="CF",user.bins = bin)	
 		    clap.survey.obj[[bnk]] <- survey.dat.restrat(surv.Clap.Rand[[bnk]],SpatHtWt.fit[[bnk]], RS=RS, CS= CS, 
 		                                bk=bnk, areas=strata.areas, mw.par="CF",user.bins = bin)		
 		    }
 		    
-		  if(!bnk="Sab"){  
+		  if(bnk!="Sab"){  
 		    survey.obj[[bnk]] <- survey.dat(surv.Rand[[bnk]], RS=RS, CS=CS, 
 		                                bk=bnk, areas=strata.areas, mw.par="CF",user.bins = bin)	
 		    clap.survey.obj[[bnk]] <- survey.dat(surv.Clap.Rand[[bnk]],SpatHtWt.fit[[bnk]], RS=RS, CS= CS, 
