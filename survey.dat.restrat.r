@@ -80,8 +80,8 @@ domain.obj <- HSIstrata.obj[HSIstrata.obj$startyear == max(unique(HSIstrata.obj$
 domain.obj$Strata <- paste0(domain.obj$Strata, "_2.0")
 domain.obj$strata.id <- paste0(domain.obj$strata.id, "_2.0")
 
-# and you gotta do this in your actual tow data too. Everything has to match.
-shf$Strata_ID_new  <- paste0(shf$Strata_ID_new, "_2.0")
+# and if you haven't already, you gotta do this in your actual tow data too. Everything has to match.
+if(nchar(unique(shf$Strata_ID_new)) == nchar(unique(shf$Strata_ID_old))) shf$Strata_ID_new  <- paste0(shf$Strata_ID_new, "_2.0")
 }
 
 if(!length(unique(HSIstrata.obj$startyear))==2){
@@ -270,18 +270,18 @@ NPR.tmp <- summary.domain.est(scall.dom.n.IPR)
 NR.tmp <- summary.domain.est(scall.dom.n.IR)
 N.tmp <- summary.domain.est(scall.dom.n.I)
 
-out.domain[m,seq(3, 13, 2)] <- as.numeric(c(scall.sum.w.IPR[[2]][2],
-                                     scall.sum.w.IR[[2]][2],
-                                     scall.sum.w.I[[2]][2],
-                                     scall.sum.n.IPR[[2]][2],
-                                     scall.sum.n.IR[[2]][2],
-                                     scall.sum.n.I[[2]][2]))
-out.domain[m,seq(4, 14, 2)] <- as.numeric(c(scall.sum.w.IPR[[2]][3],
-                                     scall.sum.w.IR[[2]][3],
-                                     scall.sum.w.I[[2]][3],
-                                     scall.sum.n.IPR[[2]][3],
-                                     scall.sum.n.IR[[2]][3],
-                                     scall.sum.n.I[[2]][3]))
+out.domain[m,seq(3, 13, 2)] <- as.numeric(c(IPR.tmp[[2]][2],
+                                            IR.tmp[[2]][2],
+                                            I.tmp[[2]][2],
+                                            NPR.tmp[[2]][2],
+                                            NR.tmp[[2]][2],
+                                            N.tmp[[2]][2]))
+out.domain[m,seq(4, 14, 2)] <- as.numeric(c(IPR.tmp[[2]][3],
+                                            IR.tmp[[2]][3],
+                                            I.tmp[[2]][3],
+                                            NPR.tmp[[2]][3],
+                                            NR.tmp[[2]][3],
+                                            N.tmp[[2]][3]))
 
 scall.levels.w.IPR <- with(scall.dom.w.IPR,data.frame(ybd=(unlist(ybd)),var.ybd=(unlist(var.ybd)),var.diffdomain=(unlist(var.diffdomain)),se.ybd=(unlist(se.ybd)) ))
 scall.levels.w.IR <- with(scall.dom.w.IR,data.frame(ybd=(unlist(ybd)),var.ybd=(unlist(var.ybd)),var.diffdomain=(unlist(var.diffdomain)),se.ybd=(unlist(se.ybd)) ))
@@ -428,12 +428,13 @@ strat.res$w.k[i] <- sum(w.yst[i,which(mw.bin==RS[i]):which(mw.bin==CS[i]-5)]) /
 
   }# end for(k in 1:length(user.bins)+1))
 
-  # Now we can get the stratified results... ## NOT RESTRATIFIED?!
+  # Now we can get the stratified results... ## NOT RESTRATIFIED?! FK START HERE ON THURSDAY!!! (Error message is:
+    ### Error in object$Wh * yh : non-numeric argument to binary operator 
     for(f in 1:length(mean.names))
       {
       # The stratified calculation/object
-      res.tmp <- summary(PEDstrata(w, domain.obj, 'STRATA.ID.NEW', user.bin.res[[bnames[f]]]),effic=T)
-      tmp[i,mean.names[f]] <-  res.tmp$yst* sum(N.tu)/10^6			# in millions or tonnes...
+      res.tmp <- summary(PEDstrata(w, domain.obj, 'STRATA.ID.NEW', catch=user.bin.res[[bnames[f]]]),effic=T)
+      tmp[i,mean.names[f]] <-  res.tmp$yst* sum(N.tu[c(1,3,5,7,9)])/10^6			# in millions or tonnes...
       # Strata calculations for biomass for pre-recruit sized Scallops
       if(err=='str') tmp[i,CV.names[f]] <- res.tmp$se.yst /  res.tmp$yst
       if(err=='ran') tmp[i,CV.names[f]] <- sqrt(res.tmp$var.ran) /  res.tmp$yst
