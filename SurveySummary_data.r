@@ -397,7 +397,7 @@ years <- yr.start:yr
     detail.poly.surv <- subset(survey.detail.polys,label==bnk)
     attr(detail.poly.surv,"projection")<-"LL"
     
-    # Get the strata areas. ## FKSABLENOTE ##
+    # Get the strata areas.
     strata.areas <- subset(survey.info,label==bnk,select =c("Strata_ID","towable_area","startyear"))
     #Read25 read removed... Get all the details of the survey strata
     surv.info <- subset(survey.info,label== bnk)
