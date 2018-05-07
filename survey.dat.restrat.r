@@ -366,31 +366,31 @@ NPR.tmp <- summary(Strata.obj$N[[i]], effic=T)
 # By this point, we should have matching df's whether it's pre re-stratification or post, so we can go back to treating them the same way from here on.
 
 # Convert to Biomass estiamte for the bank in tonnes
-strat.res$I[i] <- I.tmp$ybd * sum(N.tu)/10^6			#g to t
-strat.res$IR[i] <- IR.tmp$ybd * sum(N.tu)/10^6			#g to t
-strat.res$IPR[i] <- IPR.tmp$ybd * sum(N.tu)/10^6			#g to t
+strat.res$I[i] <- I.tmp$yst * sum(N.tu)/10^6			#g to t
+strat.res$IR[i] <- IR.tmp$yst * sum(N.tu)/10^6			#g to t
+strat.res$IPR[i] <- IPR.tmp$yst * sum(N.tu)/10^6			#g to t
 
 # Calculate the CV, 'str' is the stratified CV, the 'ran' option gives the random design CV.
-if(err=='str') strat.res$I.cv[i] <- I.tmp$se.ybd / I.tmp$ybd
-if(err=='str') strat.res$IR.cv[i] <- IR.tmp$se.ybd / IR.tmp$ybd
-if(err=='str') strat.res$IPR.cv[i] <- IPR.tmp$se.ybd / IPR.tmp$ybd
+if(err=='str') strat.res$I.cv[i] <- I.tmp$se.yst / I.tmp$yst
+if(err=='str') strat.res$IR.cv[i] <- IR.tmp$se.yst / IR.tmp$yst
+if(err=='str') strat.res$IPR.cv[i] <- IPR.tmp$se.yst / IPR.tmp$yst
 # Note here that the variance from the summary is more like a variance of an s.e. rather than a variance of a s.d.
-if(err=='ran') strat.res$I.cv[i] <- sqrt(I.tmp$var.ybd) / I.tmp$ybd
-if(err=='ran') strat.res$IR.cv[i] <- IR.tmp$se.ybd / IR.tmp$ybd
-if(err=='ran') strat.res$IPR.cv[i] <- IPR.tmp$se.ybd / IPR.tmp$ybd
+if(err=='ran') strat.res$I.cv[i] <- sqrt(I.tmp$var.yst) / I.tmp$yst
+if(err=='ran') strat.res$IR.cv[i] <- sqrt(IR.tmp$var.yst) / IR.tmp$yst
+if(err=='ran') strat.res$IPR.cv[i] <- sqrt(IRP.tmp$var.yst) / IPR.tmp$yst
 
 # Strata calculations for abundance for three size groups of Scallops
-strat.res$N[i] <- N.tmp$ybd * sum(N.tu)/10^6			#in millions
-strat.res$NR[i] <- NR.tmp$ybd * sum(N.tu)/10^6			#in millions
-strat.res$NPR[i] <- NPR.tmp$ybd * sum(N.tu)/10^6			#in millions
+strat.res$N[i] <- N.tmp$yst * sum(N.tu)/10^6			#in millions
+strat.res$NR[i] <- NR.tmp$yst * sum(N.tu)/10^6			#in millions
+strat.res$NPR[i] <- NPR.tmp$yst * sum(N.tu)/10^6			#in millions
 
 # Calculate the CV, 'str' is the stratified CV, the 'ran' option gives the random design CV.
-if(err=='str') strat.res$N.cv[i] <- N.tmp$se.ybd / N.tmp$ybd
-if(err=='str') strat.res$NR.cv[i] <- NR.tmp$se.ybd / NR.tmp$ybd
-if(err=='str') strat.res$NPR.cv[i] <- NPR.tmp$se.ybd / NPR.tmp$ybd
-if(err=='ran') strat.res$N.cv[i] <- sqrt(N.tmp$var.ybd) / N.tmp$ybd
-if(err=='ran') strat.res$NR.cv[i] <- sqrt(NR.tmp$var.ybd) / NR.tmp$ybd
-if(err=='ran') strat.res$NPR.cv[i] <- sqrt(NPR.tmp$var.ybd) / NPR.tmp$ybd
+if(err=='str') strat.res$N.cv[i] <- N.tmp$se.yst / N.tmp$yst
+if(err=='str') strat.res$NR.cv[i] <- NR.tmp$se.yst / NR.tmp$yst
+if(err=='str') strat.res$NPR.cv[i] <- NPR.tmp$se.yst / NPR.tmp$yst
+if(err=='ran') strat.res$N.cv[i] <- sqrt(N.tmp$var.yst) / N.tmp$yst
+if(err=='ran') strat.res$NR.cv[i] <- sqrt(NR.tmp$var.yst) / NR.tmp$yst
+if(err=='ran') strat.res$NPR.cv[i] <- sqrt(NPR.tmp$var.yst) / NPR.tmp$yst
 
 # Average weight of fully recruited scallop by year
 strat.res$w.bar[i] <- sum(w.yst[i,which(mw.bin==CS[i]):which(mw.bin==200)]) /
