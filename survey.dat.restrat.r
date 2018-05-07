@@ -311,7 +311,7 @@ scall.levels.w.IR[[i]] <- scall.levels.w.IR
 scall.levels.w.I[[i]] <- scall.levels.w.I
 scall.levels.n.IPR[[i]] <- scall.levels.n.IPR
 scall.levels.n.IR[[i]] <- scall.levels.n.IR
-scall.levels.n.I[[i] <- scall.levels.n.I
+scall.levels.n.I[[i]] <- scall.levels.n.I
 
 # out.domain ### THIS CONTAINS STRATIFIED ESTIMATES. NO NEED TO RUN PEDSTRATA AGAIN!
 
@@ -356,11 +356,11 @@ Strata.obj$I[[i]] <- PEDstrata(w, domain.obj,'STRATA.ID.NEW',w$com)
 strat.res$n[i] <- sum(Strata.obj$I[[i]]$nh)
 # summary of stratified design, returns a number of useful survey design results and optimization summaries.
 I.tmp <- summary(Strata.obj$I[[i]],effic=T)
-I.tmp <- summary(Strata.obj$I[[i]],effic=T)
-I.tmp <- summary(Strata.obj$I[[i]],effic=T)
+IR.tmp <- summary(Strata.obj$IR[[i]],effic=T)
+IPR.tmp <- summary(Strata.obj$IPR[[i]],effic=T)
 N.tmp <- summary(Strata.obj$N[[i]], effic=T)
-NR.tmp <- summary(Strata.obj$N[[i]], effic=T)
-NPR.tmp <- summary(Strata.obj$N[[i]], effic=T)
+NR.tmp <- summary(Strata.obj$NR[[i]], effic=T)
+NPR.tmp <- summary(Strata.obj$NPR[[i]], effic=T)
 } # end if(years[i] = or > year of restratification )
 
 # By this point, we should have matching df's whether it's pre re-stratification or post, so we can go back to treating them the same way from here on.
@@ -377,7 +377,7 @@ if(err=='str') strat.res$IPR.cv[i] <- IPR.tmp$se.yst / IPR.tmp$yst
 # Note here that the variance from the summary is more like a variance of an s.e. rather than a variance of a s.d.
 if(err=='ran') strat.res$I.cv[i] <- sqrt(I.tmp$var.yst) / I.tmp$yst
 if(err=='ran') strat.res$IR.cv[i] <- sqrt(IR.tmp$var.yst) / IR.tmp$yst
-if(err=='ran') strat.res$IPR.cv[i] <- sqrt(IRP.tmp$var.yst) / IPR.tmp$yst
+if(err=='ran') strat.res$IPR.cv[i] <- sqrt(IPR.tmp$var.yst) / IPR.tmp$yst
 
 # Strata calculations for abundance for three size groups of Scallops
 strat.res$N[i] <- N.tmp$yst * sum(N.tu)/10^6			#in millions
