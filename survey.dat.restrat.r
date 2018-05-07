@@ -146,6 +146,8 @@ scall.est.w.I <- NULL
 scall.est.n.IPR <- NULL
 scall.est.n.IR <- NULL
 scall.est.n.I <- NULL
+scall.dom.w.bins<- NULL
+scall.dom.n.bins<- NULL
 out.domain <- data.frame(YEAR=years,BANK=bk,
                   yst.w.IPR=rep(NA,length(years)),
                   var.yst.w.IPR=rep(NA,length(years)),
@@ -224,8 +226,6 @@ pstrat_old <- as.numeric(N.tu.old/sum(N.tu.old))
 
 pstrat_new <- data.frame(prop=c(pstrat_new, NA), strata_id=c(paste0(501:505, "_2.0"), "NA_2.0"))
 
-
-
 # restratification occurs for all years < 2018
 if(years[i]<max(unique(HSIstrata.obj$startyear))){
 # get domaine estimator for biomasses in each size category - Domain.estimates(data, Strata, Domain, strata.obj, domain.obj, Nd = NULL
@@ -234,9 +234,15 @@ scall.dom.w.IPR <- Domain.estimates(w$pre, w$STRATA.ID.OLD, w$STRATA.ID.NEW, str
 scall.dom.w.IR <- Domain.estimates(w$rec, w$STRATA.ID.OLD, w$STRATA.ID.NEW, strata.obj, domain.obj)
 scall.dom.w.I <- Domain.estimates(w$com, w$STRATA.ID.OLD, w$STRATA.ID.NEW, strata.obj, domain.obj)
 
+scall.dom.w.bins[[i]] <- lapply(w[, which(mw.bin==5):which(mw.bin==200)], function(x) Domain.estimates(x, Strata=w$STRATA.ID.OLD, Domain=w$STRATA.ID.NEW, 
+                                                           strata.obj=strata.obj, domain.obj=domain.obj))
+
 scall.dom.n.IPR <- Domain.estimates(num$pre, num$STRATA.ID.OLD, num$STRATA.ID.NEW, strata.obj, domain.obj)
 scall.dom.n.IR <- Domain.estimates(num$rec, num$STRATA.ID.OLD, num$STRATA.ID.NEW, strata.obj, domain.obj)
 scall.dom.n.I <- Domain.estimates(num$com, num$STRATA.ID.OLD, num$STRATA.ID.NEW, strata.obj, domain.obj)
+
+scall.dom.n.bins[[i]] <- lapply(num[, which(mw.bin==5):which(mw.bin==200)], function(x) Domain.estimates(x, Strata=num$STRATA.ID.OLD, Domain=num$STRATA.ID.NEW, 
+                                                                                                       strata.obj=strata.obj, domain.obj=domain.obj))
 # ### change m to i
 # scall.est.w.IPR[[m]] <- c(YR=years[i], bank=bk, scall.dom.w.IPR)
 # scall.est.w.IR[[m]] <- c(YR=years[i], bank=bk, scall.dom.w.IR)
