@@ -224,21 +224,7 @@ pstrat_old <- as.numeric(N.tu.old/sum(N.tu.old))
 
 pstrat_new <- data.frame(prop=c(pstrat_new, NA), strata_id=c(paste0(501:505, "_2.0"), "NA_2.0"))
 
-# Calculate the mean abundance and mean biomass (grams) per tow (for each NEW strata. (ybar_h) ## check that 29 only does this for new strata
-n.stratmeans[[i]] <- with(num, sapply(1:40, function(x){tapply(num[,x],STRATA.ID.NEW,mean)}))
-w.stratmeans[[i]] <- with(w, sapply(1:40, function(x){tapply(w[,x],STRATA.ID.NEW,mean)}))
 
-#Multiply the mean abundance(biomass) in each shell height category in a strata by the proportion of towable area
-#in that strata.  Sum this product for each strata resulting in an estimate of total abundance (biomass) for each
-#shell height category in a given year. (ybar_st)
-if(is.null(nrow(n.stratmeans[[i]]))) n.yst[i,] <- n.stratmeans[[i]] 
-if(!is.null(nrow(n.stratmeans[[i]]))) n.yst[i,] <- apply(X=sapply(1:nrow(n.stratmeans[[i]]), function(x){n.stratmeans[[i]][x,] * pstrat_new$prop[pstrat_new$strata_id %in% row.names(n.stratmeans[[i]])][x]}),MARGIN = 1, FUN = function(X) sum(X, na.rm=T))
-#  Now multiply by the total bank area to determine the survey estimated abundance(biomass).
-# The abundance is actual numbers 
-n.Yst <- n.yst[i,] * sum(N.tu) 
-if(is.null(nrow(w.stratmeans[[i]])))  w.yst[i,] <- w.stratmeans[[i]]
-if(!is.null(nrow(w.stratmeans[[i]]))) w.yst[i,] <- apply(X=sapply(1:nrow(w.stratmeans[[i]]), function(x){w.stratmeans[[i]][x,] * pstrat_new$prop[pstrat_new$strata_id %in% row.names(n.stratmeans[[i]])][x]}),MARGIN=1, FUN = function(X) sum(X, na.rm=T))
-w.Yst <- w.yst[i,] * sum(N.tu)
 
 # restratification occurs for all years < 2018
 if(years[i]<max(unique(HSIstrata.obj$startyear))){
@@ -281,41 +267,51 @@ out.domain[i,seq(4, 14, 2)] <- as.numeric(c(IPR.tmp[[2]][3],
                                             NR.tmp[[2]][3],
                                             N.tmp[[2]][3]))
 
-# ## docall with cbind or data.frame?? to replace this crazy stuff:
-# scall.levels.w.IPR <- with(scall.dom.w.IPR,data.frame(ybd=(unlist(ybd)),var.ybd=(unlist(var.ybd)),var.diffdomain=(unlist(var.diffdomain)),se.ybd=(unlist(se.ybd)) ))
-# scall.levels.w.IR <- with(scall.dom.w.IR,data.frame(ybd=(unlist(ybd)),var.ybd=(unlist(var.ybd)),var.diffdomain=(unlist(var.diffdomain)),se.ybd=(unlist(se.ybd)) ))
-# scall.levels.w.I <- with(scall.dom.w.I,data.frame(ybd=(unlist(ybd)),var.ybd=(unlist(var.ybd)),var.diffdomain=(unlist(var.diffdomain)),se.ybd=(unlist(se.ybd)) ))
-# scall.levels.n.IPR <- with(scall.dom.n.IPR,data.frame(ybd=(unlist(ybd)),var.ybd=(unlist(var.ybd)),var.diffdomain=(unlist(var.diffdomain)),se.ybd=(unlist(se.ybd)) ))
-# scall.levels.n.IR <- with(scall.dom.n.IR,data.frame(ybd=(unlist(ybd)),var.ybd=(unlist(var.ybd)),var.diffdomain=(unlist(var.diffdomain)),se.ybd=(unlist(se.ybd)) ))
-# scall.levels.n.I <- with(scall.dom.n.I,data.frame(ybd=(unlist(ybd)),var.ybd=(unlist(var.ybd)),var.diffdomain=(unlist(var.diffdomain)),se.ybd=(unlist(se.ybd)) ))
+# # Calculate the mean abundance and mean biomass (grams) per tow (for each NEW strata. (ybar_h) ## check that 29 only does this for new strata
+# n.stratmeans[[i]] <- with(num, sapply(1:40, function(x){tapply(num[,x],STRATA.ID.NEW,mean)}))
+# w.stratmeans[[i]] <- with(w, sapply(1:40, function(x){tapply(w[,x],STRATA.ID.NEW,mean)}))
 # 
-# scall.levels.w.IPR$LEVEL <- row.names(scall.levels.w.IPR)
-# scall.levels.w.IR$LEVEL <- row.names(scall.levels.w.IPR)
-# scall.levels.w.I$LEVEL <- row.names(scall.levels.w.IPR) 
-# scall.levels.n.IPR$LEVEL <- row.names(scall.levels.w.IPR)
-# scall.levels.n.IR$LEVEL <- row.names(scall.levels.w.IPR)
-# scall.levels.n.I$LEVEL <- row.names(scall.levels.w.IPR)
-# 
-# scall.levels.w.IPR$YEAR <- rep(years[i],dim(scall.levels.w.IPR)[1])
-# scall.levels.w.IR$YEAR <- rep(years[i],dim(scall.levels.w.IR)[1])
-# scall.levels.w.I$YEAR <- rep(years[i],dim(scall.levels.w.I)[1])
-# scall.levels.n.IPR$YEAR <- rep(years[i],dim(scall.levels.n.IPR)[1])
-# scall.levels.n.IR$YEAR <- rep(years[i],dim(scall.levels.n.IR)[1])
-# scall.levels.n.I$YEAR <- rep(years[i],dim(scall.levels.n.I)[1])
-# 
-# scall.levels.w.IPR$BANK <- rep(bk,dim(scall.levels.w.IPR)[1])
-# scall.levels.w.IR$BANK <- rep(bk,dim(scall.levels.w.IR)[1])
-# scall.levels.w.I$BANK <- rep(bk,dim(scall.levels.w.I)[1])
-# scall.levels.n.IPR$YEAR <- rep(bk,dim(scall.levels.n.IPR)[1])
-# scall.levels.n.IR$YEAR <- rep(bk,dim(scall.levels.n.IR)[1])
-# scall.levels.n.I$YEAR <- rep(bk,dim(scall.levels.n.I)[1])
-# 
-# scall.levels.w.IPR[[m]] <- scall.levels.w.IPR
-# scall.levels.w.IR[[m]] <- scall.levels.w.IR
-# scall.levels.w.I[[m]] <- scall.levels.w.I
-# scall.levels.n.IPR[[m]] <- scall.levels.n.IPR
-# scall.levels.n.IR[[m]] <- scall.levels.n.IR
-# scall.levels.n.I[[m]] <- scall.levels.n.I
+# #Multiply the mean abundance(biomass) in each shell height category in a strata by the proportion of towable area
+# #in that strata.  Sum this product for each strata resulting in an estimate of total abundance (biomass) for each
+# #shell height category in a given year. (ybar_st)
+# if(is.null(nrow(n.stratmeans[[i]]))) n.yst[i,] <- n.stratmeans[[i]] 
+# if(!is.null(nrow(n.stratmeans[[i]]))) n.yst[i,] <- apply(X=sapply(1:nrow(n.stratmeans[[i]]), function(x){n.stratmeans[[i]][x,] * pstrat_new$prop[pstrat_new$strata_id %in% row.names(n.stratmeans[[i]])][x]}),MARGIN = 1, FUN = function(X) sum(X, na.rm=T))
+# #  Now multiply by the total bank area to determine the survey estimated abundance(biomass).
+# # The abundance is actual numbers 
+# n.Yst <- n.yst[i,] * sum(N.tu) 
+# if(is.null(nrow(w.stratmeans[[i]])))  w.yst[i,] <- w.stratmeans[[i]]
+# if(!is.null(nrow(w.stratmeans[[i]]))) w.yst[i,] <- apply(X=sapply(1:nrow(w.stratmeans[[i]]), function(x){w.stratmeans[[i]][x,] * pstrat_new$prop[pstrat_new$strata_id %in% row.names(n.stratmeans[[i]])][x]}),MARGIN=1, FUN = function(X) sum(X, na.rm=T))
+# w.Yst <- w.yst[i,] * sum(N.tu)
+
+
+## docall with cbind or data.frame?? to replace this crazy stuff:
+scall.levels.w.IPR <- with(scall.dom.w.IPR,data.frame(ybd=(unlist(ybd)),var.ybd=(unlist(var.ybd)),var.diffdomain=(unlist(var.diffdomain)),se.ybd=(unlist(se.ybd)) ))
+scall.levels.w.IR <- with(scall.dom.w.IR,data.frame(ybd=(unlist(ybd)),var.ybd=(unlist(var.ybd)),var.diffdomain=(unlist(var.diffdomain)),se.ybd=(unlist(se.ybd)) ))
+scall.levels.w.I <- with(scall.dom.w.I,data.frame(ybd=(unlist(ybd)),var.ybd=(unlist(var.ybd)),var.diffdomain=(unlist(var.diffdomain)),se.ybd=(unlist(se.ybd)) ))
+scall.levels.n.IPR <- with(scall.dom.n.IPR,data.frame(ybd=(unlist(ybd)),var.ybd=(unlist(var.ybd)),var.diffdomain=(unlist(var.diffdomain)),se.ybd=(unlist(se.ybd)) ))
+scall.levels.n.IR <- with(scall.dom.n.IR,data.frame(ybd=(unlist(ybd)),var.ybd=(unlist(var.ybd)),var.diffdomain=(unlist(var.diffdomain)),se.ybd=(unlist(se.ybd)) ))
+scall.levels.n.I <- with(scall.dom.n.I,data.frame(ybd=(unlist(ybd)),var.ybd=(unlist(var.ybd)),var.diffdomain=(unlist(var.diffdomain)),se.ybd=(unlist(se.ybd)) ))
+
+scall.levels.w.IPR$Strata <- row.names(scall.levels.w.IPR)
+scall.levels.w.IR$Strata <- row.names(scall.levels.w.IPR)
+scall.levels.w.I$Strata <- row.names(scall.levels.w.IPR)
+scall.levels.n.IPR$Strata <- row.names(scall.levels.w.IPR)
+scall.levels.n.IR$Strata <- row.names(scall.levels.w.IPR)
+scall.levels.n.I$Strata <- row.names(scall.levels.w.IPR)
+
+scall.levels.w.IPR$year <- rep(years[i],dim(scall.levels.w.IPR)[1])
+scall.levels.w.IR$year <- rep(years[i],dim(scall.levels.w.IR)[1])
+scall.levels.w.I$year <- rep(years[i],dim(scall.levels.w.I)[1])
+scall.levels.n.IPR$year <- rep(years[i],dim(scall.levels.n.IPR)[1])
+scall.levels.n.IR$year <- rep(years[i],dim(scall.levels.n.IR)[1])
+scall.levels.n.I$year <- rep(years[i],dim(scall.levels.n.I)[1])
+
+scall.levels.w.IPR[[i]] <- scall.levels.w.IPR
+scall.levels.w.IR[[i]] <- scall.levels.w.IR
+scall.levels.w.I[[i]] <- scall.levels.w.I
+scall.levels.n.IPR[[i]] <- scall.levels.n.IPR
+scall.levels.n.IR[[i]] <- scall.levels.n.IR
+scall.levels.n.I[[i] <- scall.levels.n.I
 
 # out.domain ### THIS CONTAINS STRATIFIED ESTIMATES. NO NEED TO RUN PEDSTRATA AGAIN!
 
@@ -335,7 +331,23 @@ strat.res$n[i] <- sum(scall.dom.w.I$nh)
 }# end if(years[i] < year of restratification )
 
 if(years[i] == max(unique(HSIstrata.obj$startyear)) | years[i] > max(unique(HSIstrata.obj$startyear))) {
-  
+
+  # Calculate the mean abundance and mean biomass (grams) per tow (for each NEW strata. (ybar_h) ## check that 29 only does this for new strata
+  n.stratmeans[[i]] <- with(num, sapply(1:40, function(x){tapply(num[,x],STRATA.ID.NEW,mean)}))
+  w.stratmeans[[i]] <- with(w, sapply(1:40, function(x){tapply(w[,x],STRATA.ID.NEW,mean)}))
+
+  #Multiply the mean abundance(biomass) in each shell height category in a strata by the proportion of towable area
+  #in that strata.  Sum this product for each strata resulting in an estimate of total abundance (biomass) for each
+  #shell height category in a given year. (ybar_st)
+  if(is.null(nrow(n.stratmeans[[i]]))) n.yst[i,] <- n.stratmeans[[i]]
+  if(!is.null(nrow(n.stratmeans[[i]]))) n.yst[i,] <- apply(X=sapply(1:nrow(n.stratmeans[[i]]), function(x){n.stratmeans[[i]][x,] * pstrat_new$prop[pstrat_new$strata_id %in% row.names(n.stratmeans[[i]])][x]}),MARGIN = 1, FUN = function(X) sum(X, na.rm=T))
+  #  Now multiply by the total bank area to determine the survey estimated abundance(biomass).
+  # The abundance is actual numbers
+  n.Yst <- n.yst[i,] * sum(N.tu)
+  if(is.null(nrow(w.stratmeans[[i]])))  w.yst[i,] <- w.stratmeans[[i]]
+  if(!is.null(nrow(w.stratmeans[[i]]))) w.yst[i,] <- apply(X=sapply(1:nrow(w.stratmeans[[i]]), function(x){w.stratmeans[[i]][x,] * pstrat_new$prop[pstrat_new$strata_id %in% row.names(n.stratmeans[[i]])][x]}),MARGIN=1, FUN = function(X) sum(X, na.rm=T))
+  w.Yst <- w.yst[i,] * sum(N.tu)
+    
 # Strata calculations for biomass for commerical size Scallops
 Strata.obj$I[[i]] <- PEDstrata(w, domain.obj,'STRATA.ID.NEW',w$com)
 Strata.obj$I[[i]] <- PEDstrata(w, domain.obj,'STRATA.ID.NEW',w$com)
@@ -354,31 +366,31 @@ NPR.tmp <- summary(Strata.obj$N[[i]], effic=T)
 # By this point, we should have matching df's whether it's pre re-stratification or post, so we can go back to treating them the same way from here on.
 
 # Convert to Biomass estiamte for the bank in tonnes
-strat.res$I[i] <- I.tmp$yst * sum(N.tu)/10^6			#g to t
-strat.res$IR[i] <- IR.tmp$yst * sum(N.tu)/10^6			#g to t
-strat.res$IPR[i] <- IPR.tmp$yst * sum(N.tu)/10^6			#g to t
+strat.res$I[i] <- I.tmp$ybd * sum(N.tu)/10^6			#g to t
+strat.res$IR[i] <- IR.tmp$ybd * sum(N.tu)/10^6			#g to t
+strat.res$IPR[i] <- IPR.tmp$ybd * sum(N.tu)/10^6			#g to t
 
 # Calculate the CV, 'str' is the stratified CV, the 'ran' option gives the random design CV.
-if(err=='str') strat.res$I.cv[i] <- I.tmp$se.yst / I.tmp$yst
-if(err=='str') strat.res$IR.cv[i] <- IR.tmp$se.yst / IR.tmp$yst
-if(err=='str') strat.res$IPR.cv[i] <- IPR.tmp$se.yst / IPR.tmp$yst
+if(err=='str') strat.res$I.cv[i] <- I.tmp$se.ybd / I.tmp$ybd
+if(err=='str') strat.res$IR.cv[i] <- IR.tmp$se.ybd / IR.tmp$ybd
+if(err=='str') strat.res$IPR.cv[i] <- IPR.tmp$se.ybd / IPR.tmp$ybd
 # Note here that the variance from the summary is more like a variance of an s.e. rather than a variance of a s.d.
-if(err=='ran') strat.res$I.cv[i] <- sqrt(I.tmp$var.ran) / I.tmp$yst
-if(err=='ran') strat.res$IR.cv[i] <- IR.tmp$se.yst / IR.tmp$yst
-if(err=='ran') strat.res$IPR.cv[i] <- IPR.tmp$se.yst / IPR.tmp$yst
+if(err=='ran') strat.res$I.cv[i] <- sqrt(I.tmp$var.ybd) / I.tmp$ybd
+if(err=='ran') strat.res$IR.cv[i] <- IR.tmp$se.ybd / IR.tmp$ybd
+if(err=='ran') strat.res$IPR.cv[i] <- IPR.tmp$se.ybd / IPR.tmp$ybd
 
 # Strata calculations for abundance for three size groups of Scallops
-strat.res$N[i] <- N.tmp$yst * sum(N.tu)/10^6			#in millions
-strat.res$NR[i] <- NR.tmp$yst * sum(N.tu)/10^6			#in millions
-strat.res$NPR[i] <- NPR.tmp$yst * sum(N.tu)/10^6			#in millions
+strat.res$N[i] <- N.tmp$ybd * sum(N.tu)/10^6			#in millions
+strat.res$NR[i] <- NR.tmp$ybd * sum(N.tu)/10^6			#in millions
+strat.res$NPR[i] <- NPR.tmp$ybd * sum(N.tu)/10^6			#in millions
 
 # Calculate the CV, 'str' is the stratified CV, the 'ran' option gives the random design CV.
-if(err=='str') strat.res$N.cv[i] <- N.tmp$se.yst / N.tmp$yst
-if(err=='str') strat.res$NR.cv[i] <- NR.tmp$se.yst / NR.tmp$yst
-if(err=='str') strat.res$NPR.cv[i] <- NPR.tmp$se.yst / NPR.tmp$yst
-if(err=='ran') strat.res$N.cv[i] <- sqrt(N.tmp$var.ran) / N.tmp$yst
-if(err=='ran') strat.res$NR.cv[i] <- sqrt(NR.tmp$var.ran) / NR.tmp$yst
-if(err=='ran') strat.res$NPR.cv[i] <- sqrt(NPR.tmp$var.ran) / NPR.tmp$yst
+if(err=='str') strat.res$N.cv[i] <- N.tmp$se.ybd / N.tmp$ybd
+if(err=='str') strat.res$NR.cv[i] <- NR.tmp$se.ybd / NR.tmp$ybd
+if(err=='str') strat.res$NPR.cv[i] <- NPR.tmp$se.ybd / NPR.tmp$ybd
+if(err=='ran') strat.res$N.cv[i] <- sqrt(N.tmp$var.ybd) / N.tmp$ybd
+if(err=='ran') strat.res$NR.cv[i] <- sqrt(NR.tmp$var.ybd) / NR.tmp$ybd
+if(err=='ran') strat.res$NPR.cv[i] <- sqrt(NPR.tmp$var.ybd) / NPR.tmp$ybd
 
 # Average weight of fully recruited scallop by year
 strat.res$w.bar[i] <- sum(w.yst[i,which(mw.bin==CS[i]):which(mw.bin==200)]) /
