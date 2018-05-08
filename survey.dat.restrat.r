@@ -236,6 +236,14 @@ scall.dom.w.I <- Domain.estimates(w$com, w$STRATA.ID.OLD, w$STRATA.ID.NEW, strat
 
 scall.dom.w.bins[[i]] <- lapply(w[, which(mw.bin==5):which(mw.bin==200)], function(x) Domain.estimates(x, Strata=w$STRATA.ID.OLD, Domain=w$STRATA.ID.NEW, 
                                                            strata.obj=strata.obj, domain.obj=domain.obj))
+scall.dom.w.bins.all<-NULL
+for(h in 1:length(scall.dom.w.bins[[i]])){
+  scall.dom.w.bins.h <- scall.dom.w.bins[[i]][[h]][1]
+  scall.dom.w.bins.h <- data.frame(ybd=c(scall.dom.w.bins.h$ybd), bin=colnames(w[, which(mw.bin==5):which(mw.bin==200)])[h])
+  scall.dom.w.bins.all <- data.frame(rbind(scall.dom.w.bins.all, scall.dom.w.bins.h))
+}
+scall.dom.w.bins.all$strata <- substr(row.names(scall.dom.w.bins.all), 1, 7)
+w.stratmeans[[i]] <- reshape2::acast(scall.dom.w.bins.all, strata ~ bin, value.var="ybd")
 
 scall.dom.n.IPR <- Domain.estimates(num$pre, num$STRATA.ID.OLD, num$STRATA.ID.NEW, strata.obj, domain.obj)
 scall.dom.n.IR <- Domain.estimates(num$rec, num$STRATA.ID.OLD, num$STRATA.ID.NEW, strata.obj, domain.obj)
@@ -243,14 +251,14 @@ scall.dom.n.I <- Domain.estimates(num$com, num$STRATA.ID.OLD, num$STRATA.ID.NEW,
 
 scall.dom.n.bins[[i]] <- lapply(num[, which(mw.bin==5):which(mw.bin==200)], function(x) Domain.estimates(x, Strata=num$STRATA.ID.OLD, Domain=num$STRATA.ID.NEW, 
                                                                                                        strata.obj=strata.obj, domain.obj=domain.obj))
-# ### change m to i
-# scall.est.w.IPR[[m]] <- c(YR=years[i], bank=bk, scall.dom.w.IPR)
-# scall.est.w.IR[[m]] <- c(YR=years[i], bank=bk, scall.dom.w.IR)
-# scall.est.w.I[[m]] <- c(YR=years[i], bank=bk, scall.dom.w.I)
-# 
-# scall.est.n.IPR[[m]] <- c(YR=years[i], bank=bk, scall.dom.n.IPR)
-# scall.est.n.IR[[m]] <- c(YR=years[i], bank=bk, scall.dom.n.IR)
-# scall.est.n.I[[m]] <- c(YR=years[i], bank=bk, scall.dom.n.I)
+scall.dom.n.bins.all<-NULL
+for(h in 1:length(scall.dom.n.bins[[i]])){
+  scall.dom.n.bins.h <- scall.dom.n.bins[[i]][[h]][1]
+  scall.dom.n.bins.h <- data.frame(ybd=c(scall.dom.n.bins.h$ybd), bin=colnames(w[, which(mw.bin==5):which(mw.bin==200)])[h])
+  scall.dom.n.bins.all <- data.frame(rbind(scall.dom.n.bins.all, scall.dom.n.bins.h))
+}
+scall.dom.n.bins.all$strata <- substr(row.names(scall.dom.n.bins.all), 1, 7)
+n.stratmeans[[i]] <- reshape2::acast(scall.dom.n.bins.all, strata ~ bin, value.var="ybd")
 
 # summary of stratified design, returns a number of useful survey design results and optimization summaries.
 IPR.tmp <- summary.domain.est(scall.dom.w.IPR)
@@ -273,51 +281,47 @@ out.domain[i,seq(4, 14, 2)] <- as.numeric(c(IPR.tmp[[2]][3],
                                             NR.tmp[[2]][3],
                                             N.tmp[[2]][3]))
 
-# # Calculate the mean abundance and mean biomass (grams) per tow (for each NEW strata. (ybar_h) ## check that 29 only does this for new strata
-# n.stratmeans[[i]] <- with(num, sapply(1:40, function(x){tapply(num[,x],STRATA.ID.NEW,mean)}))
-# w.stratmeans[[i]] <- with(w, sapply(1:40, function(x){tapply(w[,x],STRATA.ID.NEW,mean)}))
-# 
-# #Multiply the mean abundance(biomass) in each shell height category in a strata by the proportion of towable area
-# #in that strata.  Sum this product for each strata resulting in an estimate of total abundance (biomass) for each
-# #shell height category in a given year. (ybar_st)
-# if(is.null(nrow(n.stratmeans[[i]]))) n.yst[i,] <- n.stratmeans[[i]] 
-# if(!is.null(nrow(n.stratmeans[[i]]))) n.yst[i,] <- apply(X=sapply(1:nrow(n.stratmeans[[i]]), function(x){n.stratmeans[[i]][x,] * pstrat_new$prop[pstrat_new$strata_id %in% row.names(n.stratmeans[[i]])][x]}),MARGIN = 1, FUN = function(X) sum(X, na.rm=T))
-# #  Now multiply by the total bank area to determine the survey estimated abundance(biomass).
-# # The abundance is actual numbers 
-# n.Yst <- n.yst[i,] * sum(N.tu) 
-# if(is.null(nrow(w.stratmeans[[i]])))  w.yst[i,] <- w.stratmeans[[i]]
-# if(!is.null(nrow(w.stratmeans[[i]]))) w.yst[i,] <- apply(X=sapply(1:nrow(w.stratmeans[[i]]), function(x){w.stratmeans[[i]][x,] * pstrat_new$prop[pstrat_new$strata_id %in% row.names(n.stratmeans[[i]])][x]}),MARGIN=1, FUN = function(X) sum(X, na.rm=T))
-# w.Yst <- w.yst[i,] * sum(N.tu)
+#Multiply the mean abundance(biomass) in each shell height category in a strata by the proportion of towable area
+#in that strata.  Sum this product for each strata resulting in an estimate of total abundance (biomass) for each
+#shell height category in a given year. (ybar_st)
+if(is.null(nrow(n.stratmeans[[i]]))) n.yst[i,] <- n.stratmeans[[i]]
+if(!is.null(nrow(n.stratmeans[[i]]))) n.yst[i,] <- apply(X=sapply(1:nrow(n.stratmeans[[i]]), function(x){n.stratmeans[[i]][x,] * pstrat_new$prop[pstrat_new$strata_id %in% row.names(n.stratmeans[[i]])][x]}),MARGIN = 1, FUN = function(X) sum(X, na.rm=T))
+#  Now multiply by the total bank area to determine the survey estimated abundance(biomass).
+# The abundance is actual numbers
+n.Yst <- n.yst[i,] * sum(N.tu)
+if(is.null(nrow(w.stratmeans[[i]])))  w.yst[i,] <- w.stratmeans[[i]]
+if(!is.null(nrow(w.stratmeans[[i]]))) w.yst[i,] <- apply(X=sapply(1:nrow(w.stratmeans[[i]]), function(x){w.stratmeans[[i]][x,] * pstrat_new$prop[pstrat_new$strata_id %in% row.names(n.stratmeans[[i]])][x]}),MARGIN=1, FUN = function(X) sum(X, na.rm=T))
+w.Yst <- w.yst[i,] * sum(N.tu)
 
 
 ## docall with cbind or data.frame?? to replace this crazy stuff:
-scall.levels.w.IPR <- with(scall.dom.w.IPR,data.frame(ybd=(unlist(ybd)),var.ybd=(unlist(var.ybd)),var.diffdomain=(unlist(var.diffdomain)),se.ybd=(unlist(se.ybd)) ))
-scall.levels.w.IR <- with(scall.dom.w.IR,data.frame(ybd=(unlist(ybd)),var.ybd=(unlist(var.ybd)),var.diffdomain=(unlist(var.diffdomain)),se.ybd=(unlist(se.ybd)) ))
-scall.levels.w.I <- with(scall.dom.w.I,data.frame(ybd=(unlist(ybd)),var.ybd=(unlist(var.ybd)),var.diffdomain=(unlist(var.diffdomain)),se.ybd=(unlist(se.ybd)) ))
-scall.levels.n.IPR <- with(scall.dom.n.IPR,data.frame(ybd=(unlist(ybd)),var.ybd=(unlist(var.ybd)),var.diffdomain=(unlist(var.diffdomain)),se.ybd=(unlist(se.ybd)) ))
-scall.levels.n.IR <- with(scall.dom.n.IR,data.frame(ybd=(unlist(ybd)),var.ybd=(unlist(var.ybd)),var.diffdomain=(unlist(var.diffdomain)),se.ybd=(unlist(se.ybd)) ))
-scall.levels.n.I <- with(scall.dom.n.I,data.frame(ybd=(unlist(ybd)),var.ybd=(unlist(var.ybd)),var.diffdomain=(unlist(var.diffdomain)),se.ybd=(unlist(se.ybd)) ))
-
-scall.levels.w.IPR$Strata <- row.names(scall.levels.w.IPR)
-scall.levels.w.IR$Strata <- row.names(scall.levels.w.IPR)
-scall.levels.w.I$Strata <- row.names(scall.levels.w.IPR)
-scall.levels.n.IPR$Strata <- row.names(scall.levels.w.IPR)
-scall.levels.n.IR$Strata <- row.names(scall.levels.w.IPR)
-scall.levels.n.I$Strata <- row.names(scall.levels.w.IPR)
-
-scall.levels.w.IPR$year <- rep(years[i],dim(scall.levels.w.IPR)[1])
-scall.levels.w.IR$year <- rep(years[i],dim(scall.levels.w.IR)[1])
-scall.levels.w.I$year <- rep(years[i],dim(scall.levels.w.I)[1])
-scall.levels.n.IPR$year <- rep(years[i],dim(scall.levels.n.IPR)[1])
-scall.levels.n.IR$year <- rep(years[i],dim(scall.levels.n.IR)[1])
-scall.levels.n.I$year <- rep(years[i],dim(scall.levels.n.I)[1])
-
-scall.levels.w.IPR[[i]] <- scall.levels.w.IPR
-scall.levels.w.IR[[i]] <- scall.levels.w.IR
-scall.levels.w.I[[i]] <- scall.levels.w.I
-scall.levels.n.IPR[[i]] <- scall.levels.n.IPR
-scall.levels.n.IR[[i]] <- scall.levels.n.IR
-scall.levels.n.I[[i]] <- scall.levels.n.I
+# scall.levels.w.IPR <- with(scall.dom.w.IPR,data.frame(ybd=(unlist(ybd)),var.ybd=(unlist(var.ybd)),var.diffdomain=(unlist(var.diffdomain)),se.ybd=(unlist(se.ybd)) ))
+# scall.levels.w.IR <- with(scall.dom.w.IR,data.frame(ybd=(unlist(ybd)),var.ybd=(unlist(var.ybd)),var.diffdomain=(unlist(var.diffdomain)),se.ybd=(unlist(se.ybd)) ))
+# scall.levels.w.I <- with(scall.dom.w.I,data.frame(ybd=(unlist(ybd)),var.ybd=(unlist(var.ybd)),var.diffdomain=(unlist(var.diffdomain)),se.ybd=(unlist(se.ybd)) ))
+# scall.levels.n.IPR <- with(scall.dom.n.IPR,data.frame(ybd=(unlist(ybd)),var.ybd=(unlist(var.ybd)),var.diffdomain=(unlist(var.diffdomain)),se.ybd=(unlist(se.ybd)) ))
+# scall.levels.n.IR <- with(scall.dom.n.IR,data.frame(ybd=(unlist(ybd)),var.ybd=(unlist(var.ybd)),var.diffdomain=(unlist(var.diffdomain)),se.ybd=(unlist(se.ybd)) ))
+# scall.levels.n.I <- with(scall.dom.n.I,data.frame(ybd=(unlist(ybd)),var.ybd=(unlist(var.ybd)),var.diffdomain=(unlist(var.diffdomain)),se.ybd=(unlist(se.ybd)) ))
+# 
+# scall.levels.w.IPR$Strata <- row.names(scall.levels.w.IPR)
+# scall.levels.w.IR$Strata <- row.names(scall.levels.w.IPR)
+# scall.levels.w.I$Strata <- row.names(scall.levels.w.IPR)
+# scall.levels.n.IPR$Strata <- row.names(scall.levels.w.IPR)
+# scall.levels.n.IR$Strata <- row.names(scall.levels.w.IPR)
+# scall.levels.n.I$Strata <- row.names(scall.levels.w.IPR)
+# 
+# scall.levels.w.IPR$year <- rep(years[i],dim(scall.levels.w.IPR)[1])
+# scall.levels.w.IR$year <- rep(years[i],dim(scall.levels.w.IR)[1])
+# scall.levels.w.I$year <- rep(years[i],dim(scall.levels.w.I)[1])
+# scall.levels.n.IPR$year <- rep(years[i],dim(scall.levels.n.IPR)[1])
+# scall.levels.n.IR$year <- rep(years[i],dim(scall.levels.n.IR)[1])
+# scall.levels.n.I$year <- rep(years[i],dim(scall.levels.n.I)[1])
+# 
+# scall.levels.w.IPR[[i]] <- scall.levels.w.IPR
+# scall.levels.w.IR[[i]] <- scall.levels.w.IR
+# scall.levels.w.I[[i]] <- scall.levels.w.I
+# scall.levels.n.IPR[[i]] <- scall.levels.n.IPR
+# scall.levels.n.IR[[i]] <- scall.levels.n.IR
+# scall.levels.n.I[[i]] <- scall.levels.n.I
 
 # out.domain ### THIS CONTAINS STRATIFIED ESTIMATES. NO NEED TO RUN PEDSTRATA AGAIN!
 
