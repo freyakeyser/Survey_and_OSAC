@@ -338,6 +338,35 @@ Strata.obj$NPR[[i]] <- out.domain$yst.n.IPR[i]
 # total number of tows
 strat.res$n[i] <- sum(scall.dom.w.I$nh)
 
+# Convert to Biomass estiamte for the bank in tonnes
+strat.res$I[i] <- I.tmp[[2]]$yst * sum(N.tu)/10^6			#g to t
+strat.res$IR[i] <- IR.tmp[[2]]$yst * sum(N.tu)/10^6			#g to t
+strat.res$IPR[i] <- IPR.tmp[[2]]$yst * sum(N.tu)/10^6			#g to t
+
+# Calculate the CV, 'str' is the stratified CV, the 'ran' option gives the random design CV.
+# FK: I'm not so sure about this. It wants se.yst for the bank, but I only get se.ybd for each strata, or var.yst for the bank.
+# I'm calculating SE as sqrt(var)/sqrt(n) for the str err method for now...
+if(err=='str') strat.res$I.cv[i] <- (sqrt(I.tmp[[2]]$var.yst)/sqrt(strat.res$n[i]))/ I.tmp[[2]]$yst
+if(err=='str') strat.res$IR.cv[i] <- (sqrt(IR.tmp[[2]]$var.yst)/sqrt(strat.res$n[i]))/ IR.tmp[[2]]$yst
+if(err=='str') strat.res$IPR.cv[i] <- (sqrt(IPR.tmp[[2]]$var.yst)/sqrt(strat.res$n[i]))/ IPR.tmp[[2]]$yst
+# Note here that the variance from the summary is more like a variance of an s.e. rather than a variance of a s.d.
+if(err=='ran') strat.res$I.cv[i] <- sqrt(I.tmp[[2]]$var.yst) / I.tmp[[2]]$yst
+if(err=='ran') strat.res$IR.cv[i] <- sqrt(IR.tmp[[2]]$var.yst) / IR.tmp[[2]]$yst
+if(err=='ran') strat.res$IPR.cv[i] <- sqrt(IPR.tmp[[2]]$var.yst) / IPR.tmp[[2]]$yst
+
+# Strata calculations for abundance for three size groups of Scallops
+strat.res$N[i] <- N.tmp[[2]]$yst * sum(N.tu)/10^6			#in millions
+strat.res$NR[i] <- NR.tmp[[2]]$yst * sum(N.tu)/10^6			#in millions
+strat.res$NPR[i] <- NPR.tmp[[2]]$yst * sum(N.tu)/10^6			#in millions
+
+# Calculate the CV, 'str' is the stratified CV, the 'ran' option gives the random design CV.
+if(err=='str') strat.res$N.cv[i] <- (sqrt(N.tmp[[2]]$var.yst)/sqrt(strat.res$n[i])) / N.tmp[[2]]$yst
+if(err=='str') strat.res$NR.cv[i] <- (sqrt(NR.tmp[[2]]$var.yst)/sqrt(strat.res$n[i])) / NR.tmp[[2]]$yst
+if(err=='str') strat.res$NPR.cv[i] <- (sqrt(NPR.tmp[[2]]$var.yst)/sqrt(strat.res$n[i])) / NPR.tmp[[2]]$yst
+if(err=='ran') strat.res$N.cv[i] <- sqrt(N.tmp[[2]]$var.yst) / N.tmp[[2]]$yst
+if(err=='ran') strat.res$NR.cv[i] <- sqrt(NR.tmp[[2]]$var.yst) / NR.tmp[[2]]$yst
+if(err=='ran') strat.res$NPR.cv[i] <- sqrt(NPR.tmp[[2]]$var.yst) / NPR.tmp[[2]]$yst
+
 }# end if(years[i] < year of restratification )
 
 if(years[i] == max(unique(HSIstrata.obj$startyear)) | years[i] > max(unique(HSIstrata.obj$startyear))) {
@@ -371,9 +400,6 @@ IPR.tmp <- summary(Strata.obj$IPR[[i]],effic=T)
 N.tmp <- summary(Strata.obj$N[[i]], effic=T)
 NR.tmp <- summary(Strata.obj$NR[[i]], effic=T)
 NPR.tmp <- summary(Strata.obj$NPR[[i]], effic=T)
-} # end if(years[i] = or > year of restratification )
-
-# By this point, we should have matching df's whether it's pre re-stratification or post, so we can go back to treating them the same way from here on.
 
 # Convert to Biomass estiamte for the bank in tonnes
 strat.res$I[i] <- I.tmp$yst * sum(N.tu)/10^6			#g to t
@@ -401,6 +427,11 @@ if(err=='str') strat.res$NPR.cv[i] <- NPR.tmp$se.yst / NPR.tmp$yst
 if(err=='ran') strat.res$N.cv[i] <- sqrt(N.tmp$var.yst) / N.tmp$yst
 if(err=='ran') strat.res$NR.cv[i] <- sqrt(NR.tmp$var.yst) / NR.tmp$yst
 if(err=='ran') strat.res$NPR.cv[i] <- sqrt(NPR.tmp$var.yst) / NPR.tmp$yst
+
+
+} # end if(years[i] = or > year of restratification )
+
+# By this point, we should have matching df's whether it's pre re-stratification or post, so we can go back to treating them the same way from here on.
 
 # Average weight of fully recruited scallop by year
 strat.res$w.bar[i] <- sum(w.yst[i,which(mw.bin==CS[i]):which(mw.bin==200)]) /
