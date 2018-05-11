@@ -431,6 +431,13 @@ if(err=='ran') strat.res$NPR.cv[i] <- sqrt(NPR.tmp$var.yst) / NPR.tmp$yst
 
 } # end if(years[i] = or > year of restratification )
 
+strat.res[i] <- cbind(strat.res$year[i], strat.res$n[i], strat.res$I[i],
+                      strat.res$I.cv[i], strat.res$IR[i], strat.res$IR.cv[i],
+                      strat.res$IPR[i],  strat.res$IPR.cv[i],
+                      strat.res$N[i], strat.res$N.cv[i],
+                      strat.res$NR[i], strat.res$NR.cv[i],
+                      strat.res$NPR[i], strat.res$NPR.cv[i])
+
 # By this point, we should have matching df's whether it's pre re-stratification or post, so we can go back to treating them the same way from here on.
 
 # Average weight of fully recruited scallop by year
