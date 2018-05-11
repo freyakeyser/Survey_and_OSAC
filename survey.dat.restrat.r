@@ -178,20 +178,20 @@ for(i in 1:length(years))
   # Use the MW-SH model fit to calculate the meat weight, assumes that year was a random effect in the model
   # Remember mw is in grams here.
   # FK had to specify htwt.fit <- SpatHtWt.fit[[bk]]??
-  if(mw.par=='annual') mw[[i]] <- as.numeric(matrix(exp(log(seq(2.5,200,5))*htwt.fit$b[i]+log(htwt.fit$a[i])),
-                                         nrow(ann.dat),40,byrow=T,dimnames=list(ann.dat$tow,mw.bin)))
+  if(mw.par=='annual') mw[[i]] <- matrix(exp(log(seq(2.5,200,5))*htwt.fit$b[i]+log(htwt.fit$a[i])),
+                                         nrow(ann.dat),40,byrow=T,dimnames=list(ann.dat$tow,mw.bin))
   # Use the MW-SH model fit to calculate the meat weight, assumes that year was not included in the model
   # Remember mw is in grams here.
   
-  if(mw.par=='fixed') mw[[i]]<-as.numeric(matrix(exp(log(seq(2.5,200,5))*htwt.fit$B+htwt.fit$A),nrow(ann.dat),40,
-                                      byrow=T,dimnames=list(ann.dat$tow,mw.bin)))
+  if(mw.par=='fixed') mw[[i]]<-matrix(exp(log(seq(2.5,200,5))*htwt.fit$B+htwt.fit$A),nrow(ann.dat),40,
+                                      byrow=T,dimnames=list(ann.dat$tow,mw.bin))
   # DK Note:  So as this was it would overwright the calculations from mw.par=="annual" but this
   # would actually cause an error if ever this was specified as annual
   # Use some other data to estimate Meat Weight, Condition factor generally used for this option.
   # Remember mw is in grams here.
   
-  if(mw.par !='annual' && mw.par !='fixed') mw[[i]]<-as.numeric(sweep(matrix((seq(2.5,200,5)/100)^3,nrow(ann.dat),
-                                                                  40,byrow=T,dimnames=list(ann.dat$tow,mw.bin)),1,FUN='*',ann.dat[,mw.par]))
+  if(mw.par !='annual' && mw.par !='fixed') mw[[i]]<-sweep(matrix((seq(2.5,200,5)/100)^3,nrow(ann.dat),
+                                                                  40,byrow=T,dimnames=list(ann.dat$tow,mw.bin)),1,FUN='*',ann.dat[,mw.par])
 print("Careful, you didn't specify the location for prediction of CF so I have picked mean depth, lat, and lon between 2005 and 2014 be sure this is how this has been done in the past!")
 
 num <- data.frame(subset(shf, year==years[i], which(bin==5):which(bin==200)), 
@@ -499,19 +499,24 @@ strat.res[i,] <- cbind(strat.res$year[i], strat.res$n[i], strat.res$I[i],
         scall.dom.w.userbin <- Domain.estimates(user.bin.res[[bnames[f]]], w$STRATA.ID.OLD, w$STRATA.ID.NEW, strata.obj, domain.obj)
         
         # summary of stratified design, returns a number of useful survey design results and optimization summaries.
-        res.tmp <- summary.domain.est(scall.dom.w.userbin)
-        res.tmp$n[i] <- sum(scall.dom.w.userbin$nh)
+        res.tmp <- summary.domain.est(scall.dom.w.userbin)[[2]]
+        res.tmp$n[i] <- sum(scall.dom.w.userbin$nh, na.rm=T)
+        
+        tmp[i,mean.names[f]] <-  res.tmp$yst* sum(N.tu)/10^6			# in millions or tonnes...
+        # Strata calculations for biomass for pre-recruit sized Scallops
+        if(err=='str') tmp[i,CV.names[f]] <- (sqrt(res.tmp$var.yst)/sqrt(res.tmp$n[i])) /  res.tmp$yst
+        if(err=='ran') tmp[i,CV.names[f]] <- sqrt(res.tmp$var.yst) /  res.tmp$yst
       }
       
-      if(years[i]<max(unique(HSIstrata.obj$startyear))) {
+      if(years[i]>max(unique(HSIstrata.obj$startyear)) | years[i]==max(unique(HSIstrata.obj$startyear))) {
         # The stratified calculation/object
-        res.tmp <- summary(PEDstrata(w, domain.obj, 'STRATA.ID.NEW', catch=user.bin.res[[bnames[f]]]),effic=T)
+        res.tmp <- summary(PEDstrata(w, domain.obj, 'STRATA.ID.NEW', user.bin.res[[bnames[f]]]),effic=T)
+        
+        tmp[i,mean.names[f]] <-  res.tmp$yst* sum(N.tu)/10^6			# in millions or tonnes...
+        # Strata calculations for biomass for pre-recruit sized Scallops
+        if(err=='str') tmp[i,CV.names[f]] <- res.tmp$se.yst /  res.tmp$yst
+        if(err=='ran') tmp[i,CV.names[f]] <- sqrt(res.tmp$var.ran) /  res.tmp$yst
       }
-      
-      tmp[i,mean.names[f]] <-  res.tmp$yst* sum(N.tu)/10^6			# in millions or tonnes...
-      # Strata calculations for biomass for pre-recruit sized Scallops
-      if(err=='str') tmp[i,CV.names[f]] <- res.tmp$se.yst /  res.tmp$yst
-      if(err=='ran') tmp[i,CV.names[f]] <- sqrt(res.tmp$var.ran) /  res.tmp$yst
       } # end for(m in 1:length(mean.names))
   } # end if(!is.null(user.bins))
 
