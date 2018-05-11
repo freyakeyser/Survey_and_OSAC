@@ -731,8 +731,8 @@ years <- yr.start:yr
 		  {
 		  
 		  if(bnk=="Sab")  {
-		    survey.obj[[bnk]] <- survey.dat.restrat(shf=surv.Rand[[bnk]], RS=RS, CS=CS, 
-		                                bk=bnk, areas=strata.areas, mw.par="CF",user.bins = bin)	
+		    survey.obj[[bnk]] <- survey.dat.restrat(shf=surv.Rand[[bnk]], RS=RS, CS=CS, #RS=80, CS=90
+		                                bk=bnk, areas=strata.areas, mw.par="CF",user.bins = bin)	# bin = c(50, 70, 80, 90, 120)
 		    clap.survey.obj[[bnk]] <- survey.dat.restrat(surv.Clap.Rand[[bnk]],SpatHtWt.fit[[bnk]], RS=RS, CS= CS, 
 		                                bk=bnk, areas=strata.areas, mw.par="CF",user.bins = bin)		
 		    }
