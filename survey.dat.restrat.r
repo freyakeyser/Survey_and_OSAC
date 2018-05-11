@@ -178,20 +178,20 @@ for(i in 1:length(years))
   # Use the MW-SH model fit to calculate the meat weight, assumes that year was a random effect in the model
   # Remember mw is in grams here.
   # FK had to specify htwt.fit <- SpatHtWt.fit[[bk]]??
-  if(mw.par=='annual') mw[[i]] <- matrix(exp(log(seq(2.5,200,5))*htwt.fit$b[i]+log(htwt.fit$a[i])),
-                                         nrow(ann.dat),40,byrow=T,dimnames=list(ann.dat$tow,mw.bin))
+  if(mw.par=='annual') mw[[i]] <- as.numeric(matrix(exp(log(seq(2.5,200,5))*htwt.fit$b[i]+log(htwt.fit$a[i])),
+                                         nrow(ann.dat),40,byrow=T,dimnames=list(ann.dat$tow,mw.bin)))
   # Use the MW-SH model fit to calculate the meat weight, assumes that year was not included in the model
   # Remember mw is in grams here.
   
-  if(mw.par=='fixed') mw[[i]]<-matrix(exp(log(seq(2.5,200,5))*htwt.fit$B+htwt.fit$A),nrow(ann.dat),40,
-                                      byrow=T,dimnames=list(ann.dat$tow,mw.bin))
+  if(mw.par=='fixed') mw[[i]]<-as.numeric(matrix(exp(log(seq(2.5,200,5))*htwt.fit$B+htwt.fit$A),nrow(ann.dat),40,
+                                      byrow=T,dimnames=list(ann.dat$tow,mw.bin)))
   # DK Note:  So as this was it would overwright the calculations from mw.par=="annual" but this
   # would actually cause an error if ever this was specified as annual
   # Use some other data to estimate Meat Weight, Condition factor generally used for this option.
   # Remember mw is in grams here.
   
-  if(mw.par !='annual' && mw.par !='fixed') mw[[i]]<-sweep(matrix((seq(2.5,200,5)/100)^3,nrow(ann.dat),
-                                                                  40,byrow=T,dimnames=list(ann.dat$tow,mw.bin)),1,FUN='*',ann.dat[,mw.par])
+  if(mw.par !='annual' && mw.par !='fixed') mw[[i]]<-as.numeric(sweep(matrix((seq(2.5,200,5)/100)^3,nrow(ann.dat),
+                                                                  40,byrow=T,dimnames=list(ann.dat$tow,mw.bin)),1,FUN='*',ann.dat[,mw.par]))
 print("Careful, you didn't specify the location for prediction of CF so I have picked mean depth, lat, and lon between 2005 and 2014 be sure this is how this has been done in the past!")
 
 num <- data.frame(subset(shf, year==years[i], which(bin==5):which(bin==200)), 
@@ -431,13 +431,6 @@ if(err=='ran') strat.res$NPR.cv[i] <- sqrt(NPR.tmp$var.yst) / NPR.tmp$yst
 
 } # end if(years[i] = or > year of restratification )
 
-strat.res[i] <- cbind(strat.res$year[i], strat.res$n[i], strat.res$I[i],
-                      strat.res$I.cv[i], strat.res$IR[i], strat.res$IR.cv[i],
-                      strat.res$IPR[i],  strat.res$IPR.cv[i],
-                      strat.res$N[i], strat.res$N.cv[i],
-                      strat.res$NR[i], strat.res$NR.cv[i],
-                      strat.res$NPR[i], strat.res$NPR.cv[i])
-
 # By this point, we should have matching df's whether it's pre re-stratification or post, so we can go back to treating them the same way from here on.
 
 # Average weight of fully recruited scallop by year
@@ -453,6 +446,15 @@ strat.res$l.k[i] <- sum((n.yst[i,]*seq(2.5,200,5))[which(mw.bin==RS[i]):which(mw
 # Weight at size of recruitment by year
 strat.res$w.k[i] <- sum(w.yst[i,which(mw.bin==RS[i]):which(mw.bin==CS[i]-5)]) /
   sum(n.yst[i,which(mw.bin==RS[i]):which(mw.bin==CS[i]-5)])		
+
+strat.res[i,] <- cbind(strat.res$year[i], strat.res$n[i], strat.res$I[i],
+                       strat.res$I.cv[i], strat.res$IR[i], strat.res$IR.cv[i],
+                       strat.res$IPR[i],  strat.res$IPR.cv[i],
+                       strat.res$N[i], strat.res$N.cv[i],
+                       strat.res$NR[i], strat.res$NR.cv[i],
+                       strat.res$NPR[i], strat.res$NPR.cv[i], 
+                       strat.res$w.bar[i], strat.res$l.bar[i],
+                       strat.res$l.k[i], strat.res$w.k[i])
 
   # So I need to get the results for the user specified SH bins if they are requested.  
   if(!is.null(user.bins))
