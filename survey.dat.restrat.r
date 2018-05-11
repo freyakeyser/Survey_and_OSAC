@@ -447,14 +447,17 @@ strat.res$l.k[i] <- sum((n.yst[i,]*seq(2.5,200,5))[which(mw.bin==RS[i]):which(mw
 strat.res$w.k[i] <- sum(w.yst[i,which(mw.bin==RS[i]):which(mw.bin==CS[i]-5)]) /
   sum(n.yst[i,which(mw.bin==RS[i]):which(mw.bin==CS[i]-5)])		
 
-strat.res[i,] <- cbind(strat.res$year[i], strat.res$n[i], strat.res$I[i],
-                       strat.res$I.cv[i], strat.res$IR[i], strat.res$IR.cv[i],
-                       strat.res$IPR[i],  strat.res$IPR.cv[i],
-                       strat.res$N[i], strat.res$N.cv[i],
-                       strat.res$NR[i], strat.res$NR.cv[i],
-                       strat.res$NPR[i], strat.res$NPR.cv[i], 
-                       strat.res$w.bar[i], strat.res$l.bar[i],
-                       strat.res$l.k[i], strat.res$w.k[i])
+strat.res[i,] <- data.frame(year=years[i], n=strat.res$n[i], I=strat.res$I[i],
+                       I.cv=strat.res$I.cv[i], IR=strat.res$IR[i], IR.cv=strat.res$IR.cv[i],
+                       IPR=strat.res$IPR[i],  IPR.cv=strat.res$IPR.cv[i],
+                       N=strat.res$N[i], N.cv=strat.res$N.cv[i],
+                       NR=strat.res$NR[i], NR.cv=strat.res$NR.cv[i],
+                       NPR=strat.res$NPR[i], NPR.cv=strat.res$NPR.cv[i], 
+                       w.bar=strat.res$w.bar[i], l.bar=strat.res$l.bar[i],
+                       l.k=strat.res$l.k[i], w.k=strat.res$w.k[i])
+
+names(strat.res) <- c("year", "n", "I", "I.cv", "IR", "IR.cv", "IPR", "IPR.cv", "N", "N.cv", "NR", "NR.cv", "NPR", "NPR.cv",
+                      "w.bar", "l.bar", "l.k", "w.k")
 
   # So I need to get the results for the user specified SH bins if they are requested.  
   if(!is.null(user.bins))
@@ -525,7 +528,7 @@ strat.res[i,] <- cbind(strat.res$year[i], strat.res$n[i], strat.res$I[i],
   # Data for the delay-difference stock assessment model and survey summary
   if(!is.null(user.bins)) model.dat <- merge(strat.res,tmp)
   if(is.null(user.bins))  model.dat <-  strat.res
-  
+
   # Data for shf plots used in the survey summary
   shf.dat <- list(n.yst=n.yst,w.yst=w.yst,n.stratmeans=n.stratmeans,w.stratmeans=w.stratmeans)
   # Return the data to function calling it.
@@ -533,7 +536,9 @@ strat.res[i,] <- cbind(strat.res$year[i], strat.res$n[i], strat.res$I[i],
   if(is.null(user.bins)) return(list(model.dat=model.dat,shf.dat=shf.dat,Strata.obj=Strata.obj))
   if(!is.null(user.bins)) return(list(model.dat=model.dat,shf.dat=shf.dat,Strata.obj=Strata.obj,bin.names = bnames,user.bins = user.bins))
   
-  }# end if(bk=="Sab")
+  model.dat
+  
+}# end if(bk=="Sab")
   
   
 } # end survey.dat.restrat()
