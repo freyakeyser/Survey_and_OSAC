@@ -280,17 +280,17 @@ out.domain[i,seq(4, 14, 2)] <- as.numeric(c(IPR.tmp[[2]][3],
                                             NR.tmp[[2]][3],
                                             N.tmp[[2]][3]))
 
-# #Multiply the mean abundance(biomass) in each shell height category in a strata by the proportion of towable area
-# #in that strata.  Sum this product for each strata resulting in an estimate of total abundance (biomass) for each
-# #shell height category in a given year. (ybar_st)
-# if(is.null(nrow(n.stratmeans[[i]]))) n.yst[i,] <- n.stratmeans[[i]]
-# if(!is.null(nrow(n.stratmeans[[i]]))) n.yst[i,] <- apply(X=sapply(1:nrow(n.stratmeans[[i]]), function(x){n.stratmeans[[i]][x,] * pstrat_new$prop[pstrat_new$strata_id %in% row.names(n.stratmeans[[i]])][x]}),MARGIN = 1, FUN = function(X) sum(X, na.rm=T))
-# #  Now multiply by the total bank area to determine the survey estimated abundance(biomass).
-# # The abundance is actual numbers
-# n.Yst <- n.yst[i,] * sum(N.tu)
-# if(is.null(nrow(w.stratmeans[[i]])))  w.yst[i,] <- w.stratmeans[[i]]
-# if(!is.null(nrow(w.stratmeans[[i]]))) w.yst[i,] <- apply(X=sapply(1:nrow(w.stratmeans[[i]]), function(x){w.stratmeans[[i]][x,] * pstrat_new$prop[pstrat_new$strata_id %in% row.names(n.stratmeans[[i]])][x]}),MARGIN=1, FUN = function(X) sum(X, na.rm=T))
-# w.Yst <- w.yst[i,] * sum(N.tu)
+#Multiply the mean abundance(biomass) in each shell height category in a strata by the proportion of towable area
+#in that strata.  Sum this product for each strata resulting in an estimate of total abundance (biomass) for each
+#shell height category in a given year. (ybar_st)
+if(is.null(nrow(n.stratmeans[[i]]))) n.yst[i,] <- n.stratmeans[[i]]
+if(!is.null(nrow(n.stratmeans[[i]]))) n.yst[i,] <- apply(X=sapply(1:nrow(n.stratmeans[[i]]), function(x){n.stratmeans[[i]][x,] * pstrat_new$prop[pstrat_new$strata_id %in% row.names(n.stratmeans[[i]])][x]}),MARGIN = 1, FUN = function(X) sum(X, na.rm=T))
+#  Now multiply by the total bank area to determine the survey estimated abundance(biomass).
+# The abundance is actual numbers
+n.Yst <- n.yst[i,] * sum(N.tu)
+if(is.null(nrow(w.stratmeans[[i]])))  w.yst[i,] <- w.stratmeans[[i]]
+if(!is.null(nrow(w.stratmeans[[i]]))) w.yst[i,] <- apply(X=sapply(1:nrow(w.stratmeans[[i]]), function(x){w.stratmeans[[i]][x,] * pstrat_new$prop[pstrat_new$strata_id %in% row.names(n.stratmeans[[i]])][x]}),MARGIN=1, FUN = function(X) sum(X, na.rm=T))
+w.Yst <- w.yst[i,] * sum(N.tu)
 
 
 ## docall with cbind or data.frame?? to replace this crazy stuff:
@@ -363,21 +363,21 @@ strat.res$NPR.cv[i] <- sqrt(NPR.tmp[[2]]$var.yst) / NPR.tmp[[2]]$yst
 
 if(years[i] == max(unique(HSIstrata.obj$startyear)) | years[i] > max(unique(HSIstrata.obj$startyear))) {
 
-  # # Calculate the mean abundance and mean biomass (grams) per tow (for each NEW strata. (ybar_h) ## check that 29 only does this for new strata
-  # n.stratmeans[[i]] <- with(num, sapply(1:40, function(x){tapply(num[,x],STRATA.ID.NEW,mean)}))
-  # w.stratmeans[[i]] <- with(w, sapply(1:40, function(x){tapply(w[,x],STRATA.ID.NEW,mean)}))
-  # 
-  # #Multiply the mean abundance(biomass) in each shell height category in a strata by the proportion of towable area
-  # #in that strata.  Sum this product for each strata resulting in an estimate of total abundance (biomass) for each
-  # #shell height category in a given year. (ybar_st)
-  # if(is.null(nrow(n.stratmeans[[i]]))) n.yst[i,] <- n.stratmeans[[i]]
-  # if(!is.null(nrow(n.stratmeans[[i]]))) n.yst[i,] <- apply(X=sapply(1:nrow(n.stratmeans[[i]]), function(x){n.stratmeans[[i]][x,] * pstrat_new$prop[pstrat_new$strata_id %in% row.names(n.stratmeans[[i]])][x]}),MARGIN = 1, FUN = function(X) sum(X, na.rm=T))
-  # #  Now multiply by the total bank area to determine the survey estimated abundance(biomass).
-  # # The abundance is actual numbers
-  # n.Yst <- n.yst[i,] * sum(N.tu)
-  # if(is.null(nrow(w.stratmeans[[i]])))  w.yst[i,] <- w.stratmeans[[i]]
-  # if(!is.null(nrow(w.stratmeans[[i]]))) w.yst[i,] <- apply(X=sapply(1:nrow(w.stratmeans[[i]]), function(x){w.stratmeans[[i]][x,] * pstrat_new$prop[pstrat_new$strata_id %in% row.names(n.stratmeans[[i]])][x]}),MARGIN=1, FUN = function(X) sum(X, na.rm=T))
-  # w.Yst <- w.yst[i,] * sum(N.tu)
+  # Calculate the mean abundance and mean biomass (grams) per tow (for each NEW strata. (ybar_h) ## check that 29 only does this for new strata
+  n.stratmeans[[i]] <- with(num, sapply(1:40, function(x){tapply(num[,x],STRATA.ID.NEW,mean)}))
+  w.stratmeans[[i]] <- with(w, sapply(1:40, function(x){tapply(w[,x],STRATA.ID.NEW,mean)}))
+
+  #Multiply the mean abundance(biomass) in each shell height category in a strata by the proportion of towable area
+  #in that strata.  Sum this product for each strata resulting in an estimate of total abundance (biomass) for each
+  #shell height category in a given year. (ybar_st)
+  if(is.null(nrow(n.stratmeans[[i]]))) n.yst[i,] <- n.stratmeans[[i]]
+  if(!is.null(nrow(n.stratmeans[[i]]))) n.yst[i,] <- apply(X=sapply(1:nrow(n.stratmeans[[i]]), function(x){n.stratmeans[[i]][x,] * pstrat_new$prop[pstrat_new$strata_id %in% row.names(n.stratmeans[[i]])][x]}),MARGIN = 1, FUN = function(X) sum(X, na.rm=T))
+  #  Now multiply by the total bank area to determine the survey estimated abundance(biomass).
+  # The abundance is actual numbers
+  n.Yst <- n.yst[i,] * sum(N.tu)
+  if(is.null(nrow(w.stratmeans[[i]])))  w.yst[i,] <- w.stratmeans[[i]]
+  if(!is.null(nrow(w.stratmeans[[i]]))) w.yst[i,] <- apply(X=sapply(1:nrow(w.stratmeans[[i]]), function(x){w.stratmeans[[i]][x,] * pstrat_new$prop[pstrat_new$strata_id %in% row.names(n.stratmeans[[i]])][x]}),MARGIN=1, FUN = function(X) sum(X, na.rm=T))
+  w.Yst <- w.yst[i,] * sum(N.tu)
     
 # Strata calculations for biomass for commerical size Scallops
 Strata.obj$I[[i]] <- PEDstrata(w, domain.obj,'STRATA.ID.NEW',w$com)
