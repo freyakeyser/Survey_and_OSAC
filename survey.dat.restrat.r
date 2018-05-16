@@ -41,13 +41,12 @@
 #mw.par:       How is meat weight to be calculated.  Default = 'annual', options are ('fixed' or 'annual') alternatively
 #              some variant of "CF" is used if the meat weight is being calculated from condition factor.  Need to have
 #              mw.par = column name that includes CF data for this option to work properly.
-#err:          What CV to calculate. Default ='str' for stratified design, "rnd" will calculate the random survey design CV.
 # user.bins:   Calculate the biomass of specified user bins, these bins will have had to already been calculated with the surv.by.tow function
 #              for this to work!!  Default is NULL which doesn't do any calculations.  If not null user.bins should look something like 
 #              user.bins <- c(50,70,90,110)
 ###############################################################################################################
 
-survey.dat.restrat <- function(shf, htwt.fit, years, RS=80, CS=100, bk="Sab", areas,  mw.par='annual',err='str',user.bins = NULL) {
+survey.dat.restrat <- function(shf, htwt.fit, years, RS=80, CS=100, bk="Sab", areas,  mw.par='annual',user.bins = NULL) {
 
   if(!bk=="Sab") print("You wound up in survey.dat.restrat even though your bank shouldn't be restratified. How did you get here? 
                         Please return to SurveySummary_data.r")
@@ -281,9 +280,9 @@ out.domain[i,seq(4, 14, 2)] <- as.numeric(c(IPR.tmp[[2]][3],
                                             NR.tmp[[2]][3],
                                             N.tmp[[2]][3]))
 
-#Multiply the mean abundance(biomass) in each shell height category in a strata by the proportion of towable area
-#in that strata.  Sum this product for each strata resulting in an estimate of total abundance (biomass) for each
-#shell height category in a given year. (ybar_st)
+# #Multiply the mean abundance(biomass) in each shell height category in a strata by the proportion of towable area
+# #in that strata.  Sum this product for each strata resulting in an estimate of total abundance (biomass) for each
+# #shell height category in a given year. (ybar_st)
 if(is.null(nrow(n.stratmeans[[i]]))) n.yst[i,] <- n.stratmeans[[i]]
 if(!is.null(nrow(n.stratmeans[[i]]))) n.yst[i,] <- apply(X=sapply(1:nrow(n.stratmeans[[i]]), function(x){n.stratmeans[[i]][x,] * pstrat_new$prop[pstrat_new$strata_id %in% row.names(n.stratmeans[[i]])][x]}),MARGIN = 1, FUN = function(X) sum(X, na.rm=T))
 #  Now multiply by the total bank area to determine the survey estimated abundance(biomass).
@@ -345,14 +344,10 @@ strat.res$IPR[i] <- IPR.tmp[[2]]$yst * sum(N.tu)/10^6			#g to t
 
 # Calculate the CV, 'str' is the stratified CV, the 'ran' option gives the random design CV.
 # FK: I'm not so sure about this. It wants se.yst for the bank, but I only get se.ybd for each strata, or var.yst for the bank.
-# I'm calculating SE as sqrt(var)/sqrt(n) for the str err method for now...
-if(err=='str') strat.res$I.cv[i] <- (sqrt(I.tmp[[2]]$var.yst)/sqrt(strat.res$n[i]))/ I.tmp[[2]]$yst
-if(err=='str') strat.res$IR.cv[i] <- (sqrt(IR.tmp[[2]]$var.yst)/sqrt(strat.res$n[i]))/ IR.tmp[[2]]$yst
-if(err=='str') strat.res$IPR.cv[i] <- (sqrt(IPR.tmp[[2]]$var.yst)/sqrt(strat.res$n[i]))/ IPR.tmp[[2]]$yst
-# Note here that the variance from the summary is more like a variance of an s.e. rather than a variance of a s.d.
-if(err=='ran') strat.res$I.cv[i] <- sqrt(I.tmp[[2]]$var.yst) / I.tmp[[2]]$yst
-if(err=='ran') strat.res$IR.cv[i] <- sqrt(IR.tmp[[2]]$var.yst) / IR.tmp[[2]]$yst
-if(err=='ran') strat.res$IPR.cv[i] <- sqrt(IPR.tmp[[2]]$var.yst) / IPR.tmp[[2]]$yst
+# I'm calculating SE as sqrt(var)for the str err method for now...
+strat.res$I.cv[i] <- sqrt(I.tmp[[2]]$var.yst)/ I.tmp[[2]]$yst
+strat.res$IR.cv[i] <- sqrt(IR.tmp[[2]]$var.yst)/ IR.tmp[[2]]$yst
+strat.res$IPR.cv[i] <- sqrt(IPR.tmp[[2]]$var.yst)/ IPR.tmp[[2]]$yst
 
 # Strata calculations for abundance for three size groups of Scallops
 strat.res$N[i] <- N.tmp[[2]]$yst * sum(N.tu)/10^6			#in millions
@@ -360,12 +355,9 @@ strat.res$NR[i] <- NR.tmp[[2]]$yst * sum(N.tu)/10^6			#in millions
 strat.res$NPR[i] <- NPR.tmp[[2]]$yst * sum(N.tu)/10^6			#in millions
 
 # Calculate the CV, 'str' is the stratified CV, the 'ran' option gives the random design CV.
-if(err=='str') strat.res$N.cv[i] <- (sqrt(N.tmp[[2]]$var.yst)/sqrt(strat.res$n[i])) / N.tmp[[2]]$yst
-if(err=='str') strat.res$NR.cv[i] <- (sqrt(NR.tmp[[2]]$var.yst)/sqrt(strat.res$n[i])) / NR.tmp[[2]]$yst
-if(err=='str') strat.res$NPR.cv[i] <- (sqrt(NPR.tmp[[2]]$var.yst)/sqrt(strat.res$n[i])) / NPR.tmp[[2]]$yst
-if(err=='ran') strat.res$N.cv[i] <- sqrt(N.tmp[[2]]$var.yst) / N.tmp[[2]]$yst
-if(err=='ran') strat.res$NR.cv[i] <- sqrt(NR.tmp[[2]]$var.yst) / NR.tmp[[2]]$yst
-if(err=='ran') strat.res$NPR.cv[i] <- sqrt(NPR.tmp[[2]]$var.yst) / NPR.tmp[[2]]$yst
+strat.res$N.cv[i] <- (sqrt(N.tmp[[2]]$var.yst)/sqrt(strat.res$n[i])) / N.tmp[[2]]$yst
+strat.res$NR.cv[i] <- (sqrt(NR.tmp[[2]]$var.yst)/sqrt(strat.res$n[i])) / NR.tmp[[2]]$yst
+strat.res$NPR.cv[i] <- (sqrt(NPR.tmp[[2]]$var.yst)/sqrt(strat.res$n[i])) / NPR.tmp[[2]]$yst
 
 }# end if(years[i] < year of restratification )
 
@@ -407,13 +399,10 @@ strat.res$IR[i] <- IR.tmp$yst * sum(N.tu)/10^6			#g to t
 strat.res$IPR[i] <- IPR.tmp$yst * sum(N.tu)/10^6			#g to t
 
 # Calculate the CV, 'str' is the stratified CV, the 'ran' option gives the random design CV.
-if(err=='str') strat.res$I.cv[i] <- I.tmp$se.yst / I.tmp$yst
-if(err=='str') strat.res$IR.cv[i] <- IR.tmp$se.yst / IR.tmp$yst
-if(err=='str') strat.res$IPR.cv[i] <- IPR.tmp$se.yst / IPR.tmp$yst
-# Note here that the variance from the summary is more like a variance of an s.e. rather than a variance of a s.d.
-if(err=='ran') strat.res$I.cv[i] <- sqrt(I.tmp$var.yst) / I.tmp$yst
-if(err=='ran') strat.res$IR.cv[i] <- sqrt(IR.tmp$var.yst) / IR.tmp$yst
-if(err=='ran') strat.res$IPR.cv[i] <- sqrt(IPR.tmp$var.yst) / IPR.tmp$yst
+strat.res$I.cv[i] <- I.tmp$se.yst / I.tmp$yst
+strat.res$IR.cv[i] <- IR.tmp$se.yst / IR.tmp$yst
+strat.res$IPR.cv[i] <- IPR.tmp$se.yst / IPR.tmp$yst
+
 
 # Strata calculations for abundance for three size groups of Scallops
 strat.res$N[i] <- N.tmp$yst * sum(N.tu)/10^6			#in millions
@@ -421,12 +410,9 @@ strat.res$NR[i] <- NR.tmp$yst * sum(N.tu)/10^6			#in millions
 strat.res$NPR[i] <- NPR.tmp$yst * sum(N.tu)/10^6			#in millions
 
 # Calculate the CV, 'str' is the stratified CV, the 'ran' option gives the random design CV.
-if(err=='str') strat.res$N.cv[i] <- N.tmp$se.yst / N.tmp$yst
-if(err=='str') strat.res$NR.cv[i] <- NR.tmp$se.yst / NR.tmp$yst
-if(err=='str') strat.res$NPR.cv[i] <- NPR.tmp$se.yst / NPR.tmp$yst
-if(err=='ran') strat.res$N.cv[i] <- sqrt(N.tmp$var.yst) / N.tmp$yst
-if(err=='ran') strat.res$NR.cv[i] <- sqrt(NR.tmp$var.yst) / NR.tmp$yst
-if(err=='ran') strat.res$NPR.cv[i] <- sqrt(NPR.tmp$var.yst) / NPR.tmp$yst
+strat.res$N.cv[i] <- N.tmp$se.yst / N.tmp$yst
+strat.res$NR.cv[i] <- NR.tmp$se.yst / NR.tmp$yst
+strat.res$NPR.cv[i] <- NPR.tmp$se.yst / NPR.tmp$yst
 
 
 } # end if(years[i] = or > year of restratification )
@@ -507,9 +493,8 @@ names(strat.res) <- c("year", "n", "I", "I.cv", "IR", "IR.cv", "IPR", "IPR.cv", 
         
         tmp[i,mean.names[f]] <-  res.tmp$yst* sum(N.tu)/10^6			# in millions or tonnes...
         # Strata calculations for biomass for pre-recruit sized Scallops
-        if(err=='str') tmp[i,CV.names[f]] <- (sqrt(res.tmp$var.yst)/sqrt(res.tmp$n[i])) /  res.tmp$yst
-        if(err=='ran') tmp[i,CV.names[f]] <- sqrt(res.tmp$var.yst) /  res.tmp$yst
-      }
+        tmp[i,CV.names[f]] <- sqrt(res.tmp$var.yst) /  res.tmp$yst
+        }
       
       if(years[i]>max(unique(HSIstrata.obj$startyear)) | years[i]==max(unique(HSIstrata.obj$startyear))) {
         # The stratified calculation/object
@@ -517,9 +502,8 @@ names(strat.res) <- c("year", "n", "I", "I.cv", "IR", "IR.cv", "IPR", "IPR.cv", 
         
         tmp[i,mean.names[f]] <-  res.tmp$yst* sum(N.tu)/10^6			# in millions or tonnes...
         # Strata calculations for biomass for pre-recruit sized Scallops
-        if(err=='str') tmp[i,CV.names[f]] <- res.tmp$se.yst /  res.tmp$yst
-        if(err=='ran') tmp[i,CV.names[f]] <- sqrt(res.tmp$var.ran) /  res.tmp$yst
-      }
+        tmp[i,CV.names[f]] <- res.tmp$se.yst /  res.tmp$yst
+        }
       } # end for(m in 1:length(mean.names))
   } # end if(!is.null(user.bins))
 
