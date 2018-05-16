@@ -283,14 +283,14 @@ out.domain[i,seq(4, 14, 2)] <- as.numeric(c(IPR.tmp[[2]][3],
 # #Multiply the mean abundance(biomass) in each shell height category in a strata by the proportion of towable area
 # #in that strata.  Sum this product for each strata resulting in an estimate of total abundance (biomass) for each
 # #shell height category in a given year. (ybar_st)
-if(is.null(nrow(n.stratmeans[[i]]))) n.yst[i,] <- n.stratmeans[[i]]
-if(!is.null(nrow(n.stratmeans[[i]]))) n.yst[i,] <- apply(X=sapply(1:nrow(n.stratmeans[[i]]), function(x){n.stratmeans[[i]][x,] * pstrat_new$prop[pstrat_new$strata_id %in% row.names(n.stratmeans[[i]])][x]}),MARGIN = 1, FUN = function(X) sum(X, na.rm=T))
-#  Now multiply by the total bank area to determine the survey estimated abundance(biomass).
-# The abundance is actual numbers
-n.Yst <- n.yst[i,] * sum(N.tu)
-if(is.null(nrow(w.stratmeans[[i]])))  w.yst[i,] <- w.stratmeans[[i]]
-if(!is.null(nrow(w.stratmeans[[i]]))) w.yst[i,] <- apply(X=sapply(1:nrow(w.stratmeans[[i]]), function(x){w.stratmeans[[i]][x,] * pstrat_new$prop[pstrat_new$strata_id %in% row.names(n.stratmeans[[i]])][x]}),MARGIN=1, FUN = function(X) sum(X, na.rm=T))
-w.Yst <- w.yst[i,] * sum(N.tu)
+# if(is.null(nrow(n.stratmeans[[i]]))) n.yst[i,] <- n.stratmeans[[i]]
+# if(!is.null(nrow(n.stratmeans[[i]]))) n.yst[i,] <- apply(X=sapply(1:nrow(n.stratmeans[[i]]), function(x){n.stratmeans[[i]][x,] * pstrat_new$prop[pstrat_new$strata_id %in% row.names(n.stratmeans[[i]])][x]}),MARGIN = 1, FUN = function(X) sum(X, na.rm=T))
+# #  Now multiply by the total bank area to determine the survey estimated abundance(biomass).
+# # The abundance is actual numbers
+# n.Yst <- n.yst[i,] * sum(N.tu)
+# if(is.null(nrow(w.stratmeans[[i]])))  w.yst[i,] <- w.stratmeans[[i]]
+# if(!is.null(nrow(w.stratmeans[[i]]))) w.yst[i,] <- apply(X=sapply(1:nrow(w.stratmeans[[i]]), function(x){w.stratmeans[[i]][x,] * pstrat_new$prop[pstrat_new$strata_id %in% row.names(n.stratmeans[[i]])][x]}),MARGIN=1, FUN = function(X) sum(X, na.rm=T))
+# w.Yst <- w.yst[i,] * sum(N.tu)
 
 
 ## docall with cbind or data.frame?? to replace this crazy stuff:
@@ -342,9 +342,9 @@ strat.res$I[i] <- I.tmp[[2]]$yst * sum(N.tu)/10^6			#g to t
 strat.res$IR[i] <- IR.tmp[[2]]$yst * sum(N.tu)/10^6			#g to t
 strat.res$IPR[i] <- IPR.tmp[[2]]$yst * sum(N.tu)/10^6			#g to t
 
-# Calculate the CV, 'str' is the stratified CV, the 'ran' option gives the random design CV.
+# Calculate the CV
 # FK: I'm not so sure about this. It wants se.yst for the bank, but I only get se.ybd for each strata, or var.yst for the bank.
-# I'm calculating SE as sqrt(var)for the str err method for now...
+# I'm calculating SE as sqrt(var) based on Y:\INSHORE SCALLOP\BoF\Assessment_fns\CV calculations for Models.docx
 strat.res$I.cv[i] <- sqrt(I.tmp[[2]]$var.yst)/ I.tmp[[2]]$yst
 strat.res$IR.cv[i] <- sqrt(IR.tmp[[2]]$var.yst)/ IR.tmp[[2]]$yst
 strat.res$IPR.cv[i] <- sqrt(IPR.tmp[[2]]$var.yst)/ IPR.tmp[[2]]$yst
@@ -354,30 +354,30 @@ strat.res$N[i] <- N.tmp[[2]]$yst * sum(N.tu)/10^6			#in millions
 strat.res$NR[i] <- NR.tmp[[2]]$yst * sum(N.tu)/10^6			#in millions
 strat.res$NPR[i] <- NPR.tmp[[2]]$yst * sum(N.tu)/10^6			#in millions
 
-# Calculate the CV, 'str' is the stratified CV, the 'ran' option gives the random design CV.
-strat.res$N.cv[i] <- (sqrt(N.tmp[[2]]$var.yst)/sqrt(strat.res$n[i])) / N.tmp[[2]]$yst
-strat.res$NR.cv[i] <- (sqrt(NR.tmp[[2]]$var.yst)/sqrt(strat.res$n[i])) / NR.tmp[[2]]$yst
-strat.res$NPR.cv[i] <- (sqrt(NPR.tmp[[2]]$var.yst)/sqrt(strat.res$n[i])) / NPR.tmp[[2]]$yst
+# Calculate the CV
+strat.res$N.cv[i] <- sqrt(N.tmp[[2]]$var.yst) / N.tmp[[2]]$yst
+strat.res$NR.cv[i] <- sqrt(NR.tmp[[2]]$var.yst) / NR.tmp[[2]]$yst
+strat.res$NPR.cv[i] <- sqrt(NPR.tmp[[2]]$var.yst) / NPR.tmp[[2]]$yst
 
 }# end if(years[i] < year of restratification )
 
 if(years[i] == max(unique(HSIstrata.obj$startyear)) | years[i] > max(unique(HSIstrata.obj$startyear))) {
 
-  # Calculate the mean abundance and mean biomass (grams) per tow (for each NEW strata. (ybar_h) ## check that 29 only does this for new strata
-  n.stratmeans[[i]] <- with(num, sapply(1:40, function(x){tapply(num[,x],STRATA.ID.NEW,mean)}))
-  w.stratmeans[[i]] <- with(w, sapply(1:40, function(x){tapply(w[,x],STRATA.ID.NEW,mean)}))
-
-  #Multiply the mean abundance(biomass) in each shell height category in a strata by the proportion of towable area
-  #in that strata.  Sum this product for each strata resulting in an estimate of total abundance (biomass) for each
-  #shell height category in a given year. (ybar_st)
-  if(is.null(nrow(n.stratmeans[[i]]))) n.yst[i,] <- n.stratmeans[[i]]
-  if(!is.null(nrow(n.stratmeans[[i]]))) n.yst[i,] <- apply(X=sapply(1:nrow(n.stratmeans[[i]]), function(x){n.stratmeans[[i]][x,] * pstrat_new$prop[pstrat_new$strata_id %in% row.names(n.stratmeans[[i]])][x]}),MARGIN = 1, FUN = function(X) sum(X, na.rm=T))
-  #  Now multiply by the total bank area to determine the survey estimated abundance(biomass).
-  # The abundance is actual numbers
-  n.Yst <- n.yst[i,] * sum(N.tu)
-  if(is.null(nrow(w.stratmeans[[i]])))  w.yst[i,] <- w.stratmeans[[i]]
-  if(!is.null(nrow(w.stratmeans[[i]]))) w.yst[i,] <- apply(X=sapply(1:nrow(w.stratmeans[[i]]), function(x){w.stratmeans[[i]][x,] * pstrat_new$prop[pstrat_new$strata_id %in% row.names(n.stratmeans[[i]])][x]}),MARGIN=1, FUN = function(X) sum(X, na.rm=T))
-  w.Yst <- w.yst[i,] * sum(N.tu)
+  # # Calculate the mean abundance and mean biomass (grams) per tow (for each NEW strata. (ybar_h) ## check that 29 only does this for new strata
+  # n.stratmeans[[i]] <- with(num, sapply(1:40, function(x){tapply(num[,x],STRATA.ID.NEW,mean)}))
+  # w.stratmeans[[i]] <- with(w, sapply(1:40, function(x){tapply(w[,x],STRATA.ID.NEW,mean)}))
+  # 
+  # #Multiply the mean abundance(biomass) in each shell height category in a strata by the proportion of towable area
+  # #in that strata.  Sum this product for each strata resulting in an estimate of total abundance (biomass) for each
+  # #shell height category in a given year. (ybar_st)
+  # if(is.null(nrow(n.stratmeans[[i]]))) n.yst[i,] <- n.stratmeans[[i]]
+  # if(!is.null(nrow(n.stratmeans[[i]]))) n.yst[i,] <- apply(X=sapply(1:nrow(n.stratmeans[[i]]), function(x){n.stratmeans[[i]][x,] * pstrat_new$prop[pstrat_new$strata_id %in% row.names(n.stratmeans[[i]])][x]}),MARGIN = 1, FUN = function(X) sum(X, na.rm=T))
+  # #  Now multiply by the total bank area to determine the survey estimated abundance(biomass).
+  # # The abundance is actual numbers
+  # n.Yst <- n.yst[i,] * sum(N.tu)
+  # if(is.null(nrow(w.stratmeans[[i]])))  w.yst[i,] <- w.stratmeans[[i]]
+  # if(!is.null(nrow(w.stratmeans[[i]]))) w.yst[i,] <- apply(X=sapply(1:nrow(w.stratmeans[[i]]), function(x){w.stratmeans[[i]][x,] * pstrat_new$prop[pstrat_new$strata_id %in% row.names(n.stratmeans[[i]])][x]}),MARGIN=1, FUN = function(X) sum(X, na.rm=T))
+  # w.Yst <- w.yst[i,] * sum(N.tu)
     
 # Strata calculations for biomass for commerical size Scallops
 Strata.obj$I[[i]] <- PEDstrata(w, domain.obj,'STRATA.ID.NEW',w$com)
@@ -398,7 +398,7 @@ strat.res$I[i] <- I.tmp$yst * sum(N.tu)/10^6			#g to t
 strat.res$IR[i] <- IR.tmp$yst * sum(N.tu)/10^6			#g to t
 strat.res$IPR[i] <- IPR.tmp$yst * sum(N.tu)/10^6			#g to t
 
-# Calculate the CV, 'str' is the stratified CV, the 'ran' option gives the random design CV.
+# Calculate the CV
 strat.res$I.cv[i] <- I.tmp$se.yst / I.tmp$yst
 strat.res$IR.cv[i] <- IR.tmp$se.yst / IR.tmp$yst
 strat.res$IPR.cv[i] <- IPR.tmp$se.yst / IPR.tmp$yst
@@ -409,7 +409,7 @@ strat.res$N[i] <- N.tmp$yst * sum(N.tu)/10^6			#in millions
 strat.res$NR[i] <- NR.tmp$yst * sum(N.tu)/10^6			#in millions
 strat.res$NPR[i] <- NPR.tmp$yst * sum(N.tu)/10^6			#in millions
 
-# Calculate the CV, 'str' is the stratified CV, the 'ran' option gives the random design CV.
+# Calculate the CV
 strat.res$N.cv[i] <- N.tmp$se.yst / N.tmp$yst
 strat.res$NR.cv[i] <- NR.tmp$se.yst / NR.tmp$yst
 strat.res$NPR.cv[i] <- NPR.tmp$se.yst / NPR.tmp$yst
