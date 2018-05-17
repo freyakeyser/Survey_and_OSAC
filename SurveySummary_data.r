@@ -21,6 +21,8 @@
 # April 2018:  Noticed we had double loaded data for 2000 and 2001 as these are now in the database, fixed.  Also had to make some annoying changes to the
 #              script as something changed with how the simple survey code was struggling with the year data due to some rbinds making it a character vector
 #              instead of a numeric... Also started using lubridate for the dates on the seedboxes as the as.Date method broke for some reason...
+# May 2018: FK implemented restratification for Sable due to WEBCA using a new function: survey.dat.restrat(). 
+#                If you need to restratify a bank, check out the function file for instructions! FK also has a private github log of changes made. 
 ################################################################################################################
 ####
 ################################################################################################################
@@ -160,7 +162,7 @@ survey.bound.polys<-read.csv(paste0(direct,"Data/Maps/approved/Survey/survey_bou
 survey.detail.polys <- read.csv(paste0(direct,"Data/Maps/approved/Survey/survey_detail_polygons.csv"), 
                                 header=T,stringsAsFactors = F)
 #Read6 Get the survey information for each bank
-survey.info <- read.csv(paste(direct,"data/Survey_data/survey_information_2018-04-30.csv",sep=""),
+survey.info <- read.csv(paste(direct,"data/Survey_data/survey_information",sep=""),
                         header=T,stringsAsFactors = F)
 
 #Read7 The boundary between Fully recruited and recruit size classes (RS = Recruit min, CS = Fully recruited (commercial) min)
