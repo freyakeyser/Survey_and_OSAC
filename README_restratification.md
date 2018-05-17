@@ -17,3 +17,4 @@ To restratify a bank using a domain estimator, you must:
 	tests on banks other than Sable. 
 	survey.dat.restrat function applies PEDstrata::Domain.estimates() to data prior to the year of restratification. 
 
+Any questions, refer to FK. I have a local & private Github record of the changes I made.
