@@ -6,14 +6,16 @@
 ####
 # Update history
 # May 2018: FK created this based on survey.dat, but with domain estimation. When more banks need restratifying, you must edit
-#           Survey.Summary_data.r to bring that bank to this script instead of using survey.dat (see Sable example on line 734
-#           of SurveySummary_data.r). This method also requires that all new strata coordinates and areas be appended to the following files,
+#           Survey.Summary_data.r to assign strata correctly (see line ~418 assign.strata() if statement) and 
+#           bring that bank to this script instead of using survey.dat (see Sable example on line 734 of SurveySummary_data.r). 
+#           This method also requires that all new strata coordinates and areas be appended to the following files,
 #           with the startyear column filled in for the year of the change:
 #           paste(direct,"data/Survey_data/survey_information.csv",sep="")
 #           paste(direct,"Data/Maps/approved/Survey/survey_detail_polygons.csv")
 #           paste(direct,"Data/Maps/approved/Survey/survey_boundary_polygons.csv")
 #           DO NOT DELETE OLD STRATA INFORMATION from any of these files as this is used to restratify historical tow data.
 #           *** Note: this method will require revisions if a bank is restratified more than once ***
+#           Documentation is in direct/Assessment_fns/Survey_and_OSAC/README_restratification.md
 ################################################################################################################
 
 #####################################  Function Summary ########################################################
