@@ -235,15 +235,15 @@ survey.dat.restrat <- function(shf, htwt.fit, years, RS=80, CS=100, bk="Sab", ar
       # restratification occurs for all years < 2018
       if(years[i]<max(unique(HSIstrata.obj$startyear))) {
         # get domaine estimator for biomasses in each size category - Domain.estimates(data, Strata, Domain, strata.obj, domain.obj, Nd = NULL
-        source("E:/INSHORE SCALLOP/BoF/Assessment_fns/SFA29W/Domainestimates.R")
+        # source("Y:/Offshore scallop/Assessment/Assessment_fns/Survey_and_OSAC/Domainestimates.R")
         
         # step 1: get a domain estimation object for each size category using PEDstrata::Domain.estimates function
-        scall.dom.IPR <- Domain.estimates(w$pre, w$STRATA.ID.OLD, w$STRATA.ID.NEW, strata.obj, domain.obj)
-        scall.dom.IR <- Domain.estimates(w$rec, w$STRATA.ID.OLD, w$STRATA.ID.NEW, strata.obj, domain.obj)
-        scall.dom.I <- Domain.estimates(w$com, w$STRATA.ID.OLD, w$STRATA.ID.NEW, strata.obj, domain.obj)
-        scall.dom.NPR <- Domain.estimates(num$pre, num$STRATA.ID.OLD, num$STRATA.ID.NEW, strata.obj, domain.obj)
-        scall.dom.NR <- Domain.estimates(num$rec, num$STRATA.ID.OLD, num$STRATA.ID.NEW, strata.obj, domain.obj)
-        scall.dom.N <- Domain.estimates(num$com, num$STRATA.ID.OLD, num$STRATA.ID.NEW, strata.obj, domain.obj)
+        scall.dom.IPR <- BIOSurvey2::Domain.est(w$pre, w$STRATA.ID.OLD, w$STRATA.ID.NEW, strata.obj, domain.obj)
+        scall.dom.IR <- BIOSurvey2::Domain.est(w$rec, w$STRATA.ID.OLD, w$STRATA.ID.NEW, strata.obj, domain.obj)
+        scall.dom.I <- BIOSurvey2::Domain.est(w$com, w$STRATA.ID.OLD, w$STRATA.ID.NEW, strata.obj, domain.obj)
+        scall.dom.NPR <- BIOSurvey2::Domain.est(num$pre, num$STRATA.ID.OLD, num$STRATA.ID.NEW, strata.obj, domain.obj)
+        scall.dom.NR <- BIOSurvey2::Domain.est(num$rec, num$STRATA.ID.OLD, num$STRATA.ID.NEW, strata.obj, domain.obj)
+        scall.dom.N <- BIOSurvey2::Domain.est(num$com, num$STRATA.ID.OLD, num$STRATA.ID.NEW, strata.obj, domain.obj)
         
         # step 2: use PEDstrata::summary.domain.est to get summary of stratified design. This returns a number of useful survey design results and optimization summaries.
         IPR.tmp <- summary.domain.est(scall.dom.IPR)
@@ -254,7 +254,6 @@ survey.dat.restrat <- function(shf, htwt.fit, years, RS=80, CS=100, bk="Sab", ar
         N.tmp <- summary.domain.est(scall.dom.N)
         
         # step 3: grab the "yst" (stratified estimates) for each size category. Remember you're still in a year loop, so this is only one year at a time.
-        out.domain[i, seq(3, 13, 2)] <- as.numeric(c(IPR.tmp[[2]][2],
                                                      IR.tmp[[2]][2],
                                                      I.tmp[[2]][2],
                                                      NPR.tmp[[2]][2],
@@ -421,9 +420,9 @@ survey.dat.restrat <- function(shf, htwt.fit, years, RS=80, CS=100, bk="Sab", ar
         {
           
           if(years[i]<max(unique(HSIstrata.obj$startyear))){
-            # get domaine estimator for biomasses in each size category - Domain.estimates(data, Strata, Domain, strata.obj, domain.obj, Nd = NULL
-            source("E:/INSHORE SCALLOP/BoF/Assessment_fns/SFA29W/Domainestimates.R")
-            scall.dom.w.userbin <- Domain.estimates(user.bin.res[[bnames[f]]], w$STRATA.ID.OLD, w$STRATA.ID.NEW, strata.obj, domain.obj)
+            # get domaine estimator for biomasses in each size category - Domain.est(data, Strata, Domain, strata.obj, domain.obj, Nd = NULL
+            source("Y:/Offshore scallop/Assessment/Assessment_fns/Survey_and_OSAC/Domainestimates.R")
+            scall.dom.w.userbin <- BIOSurvey2::Domain.est(user.bin.res[[bnames[f]]], w$STRATA.ID.OLD, w$STRATA.ID.NEW, strata.obj, domain.obj)
             
             # summary of stratified design, returns a number of useful survey design results and optimization summaries.
             res.tmp <- summary.domain.est(scall.dom.w.userbin)[[2]]
@@ -462,5 +461,7 @@ survey.dat.restrat <- function(shf, htwt.fit, years, RS=80, CS=100, bk="Sab", ar
     
   }# end if(bk=="Sab")
   
+  # Write a file with strata tow assignments just for fun:
   
+  write.csv(paste(direct, ))
 } # end survey.dat.restrat()
