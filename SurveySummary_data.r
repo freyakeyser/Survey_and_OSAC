@@ -346,10 +346,8 @@ merged.survey.obj <- NULL
 # Now get the survey summary results for all the banks...
 for(i in 1:num.surveys)
 {
-  print(surveys[i])
 #  So first thing to do is get the data for the bank....
 bnk <- as.character(unique(subset(all.surv.dat,surv.bank == surveys[i])$bank))
-print(bnk)
 bank.dat[[bnk]] <- subset(all.surv.dat,surv.bank==surveys[i])
 if(bnk == "GB") bank.dat[[bnk]] <- subset(all.surv.dat,surv.bank == surveys[i] & year != 2015)
 RS <- size.cats$RS[size.cats$Bank == bnk]
