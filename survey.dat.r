@@ -51,7 +51,7 @@ survey.dat <- function(shf, htwt.fit, years, RS=80, CS=100, bk="GBa", areas,  mw
 {
   
   # Sable gets special treatment due to restratification, so do NOT use survey.dat on it. Must use survey.dat.restrat
-  if(bnk=="Sab"){
+  if(bk=="Sab"){
     print("Something's wrong in SurveySummary_data.r because you should be running survey.dat.restrat for Sable, not survey.dat")
   }	
   
