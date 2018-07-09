@@ -144,6 +144,7 @@ survey.dat.restrat <- function(shf, htwt.fit, years, RS=80, CS=100, bk="Sab", ar
     strat.res <- data.frame(year=years)
     Strata.obj <- NULL
     mw <- NULL
+    bankpertow <- NULL
     
     #objects for domain estimation
     scall.est.w.IPR <- NULL
@@ -235,15 +236,17 @@ survey.dat.restrat <- function(shf, htwt.fit, years, RS=80, CS=100, bk="Sab", ar
       # restratification occurs for all years < 2018
       if(years[i]<max(unique(HSIstrata.obj$startyear))) {
         # get domaine estimator for biomasses in each size category - Domain.estimates(data, Strata, Domain, strata.obj, domain.obj, Nd = NULL
-        # source("Y:/Offshore scallop/Assessment/Assessment_fns/Survey_and_OSAC/Domainestimates.R")
+        source("Y:/Offshore scallop/Assessment/Assessment_fns/Survey_and_OSAC/Domainestimates.R")
         
-        # step 1: get a domain estimation object for each size category using PEDstrata::Domain.estimates function
-        scall.dom.IPR <- BIOSurvey2::Domain.est(w$pre, w$STRATA.ID.OLD, w$STRATA.ID.NEW, strata.obj, domain.obj)
-        scall.dom.IR <- BIOSurvey2::Domain.est(w$rec, w$STRATA.ID.OLD, w$STRATA.ID.NEW, strata.obj, domain.obj)
-        scall.dom.I <- BIOSurvey2::Domain.est(w$com, w$STRATA.ID.OLD, w$STRATA.ID.NEW, strata.obj, domain.obj)
-        scall.dom.NPR <- BIOSurvey2::Domain.est(num$pre, num$STRATA.ID.OLD, num$STRATA.ID.NEW, strata.obj, domain.obj)
-        scall.dom.NR <- BIOSurvey2::Domain.est(num$rec, num$STRATA.ID.OLD, num$STRATA.ID.NEW, strata.obj, domain.obj)
-        scall.dom.N <- BIOSurvey2::Domain.est(num$com, num$STRATA.ID.OLD, num$STRATA.ID.NEW, strata.obj, domain.obj)
+        # step 1: get a domain estimation object for each size category using BIOSurvey2::Domain.est function
+        scall.dom.IPR <- BIOSurvey2::Domain.est(x=w$pre, Strata=w$STRATA.ID.OLD, 
+                                                Domain=w$STRATA.ID.NEW, strata.obj=strata.obj, 
+                                                domain.obj=domain.obj)
+        scall.dom.IR <- BIOSurvey2::Domain.est(x=w$rec, Strata=w$STRATA.ID.OLD, Domain=w$STRATA.ID.NEW, strata.obj=strata.obj, domain.obj=domain.obj)
+        scall.dom.I <- BIOSurvey2::Domain.est(x=w$com, Strata=w$STRATA.ID.OLD, Domain=w$STRATA.ID.NEW, strata.obj=strata.obj, domain.obj=domain.obj)
+        scall.dom.NPR <- BIOSurvey2::Domain.est(x=num$pre, Strata=num$STRATA.ID.OLD, Domain=num$STRATA.ID.NEW, strata.obj=strata.obj, domain.obj=domain.obj)
+        scall.dom.NR <- BIOSurvey2::Domain.est(x=num$rec, Strata=num$STRATA.ID.OLD, Domain=num$STRATA.ID.NEW, strata.obj=strata.obj, domain.obj=domain.obj)
+        scall.dom.N <- BIOSurvey2::Domain.est(x=num$com, Strata=num$STRATA.ID.OLD, Domain=num$STRATA.ID.NEW, strata.obj=strata.obj, domain.obj=domain.obj)
         
         # step 2: use PEDstrata::summary.domain.est to get summary of stratified design. This returns a number of useful survey design results and optimization summaries.
         IPR.tmp <- summary.domain.est(scall.dom.IPR)
@@ -254,6 +257,7 @@ survey.dat.restrat <- function(shf, htwt.fit, years, RS=80, CS=100, bk="Sab", ar
         N.tmp <- summary.domain.est(scall.dom.N)
         
         # step 3: grab the "yst" (stratified estimates) for each size category. Remember you're still in a year loop, so this is only one year at a time.
+        out.domain[i, seq(3, 13, 2)] <- as.numeric(c(IPR.tmp[[2]][2],
                                                      IR.tmp[[2]][2],
                                                      I.tmp[[2]][2],
                                                      NPR.tmp[[2]][2],
@@ -297,6 +301,10 @@ survey.dat.restrat <- function(shf, htwt.fit, years, RS=80, CS=100, bk="Sab", ar
         strat.res$NR.cv[i] <- sqrt(NR.tmp[[2]]$var.yst) / NR.tmp[[2]]$yst
         strat.res$NPR.cv[i] <- sqrt(NPR.tmp[[2]]$var.yst) / NPR.tmp[[2]]$yst
         
+        # Save the bank-wide per tow estimates
+        bankpertow <- rbind(bankpertow, data.frame(year=years[i], N = N.tmp$`yst`, NR = NR.tmp$`yst`, NPR = NPR.tmp$`yst`, 
+                                                   I=I.tmp$`yst`, IR=IR.tmp$`yst`, IPR=IPR.tmp$`yst`))
+        
       }# end if(years[i] < year of restratification )
       
       # if the year is after 2018, then we can just run PEDstrata as normal, since the survey was conducted using the current strata.
@@ -336,6 +344,9 @@ survey.dat.restrat <- function(shf, htwt.fit, years, RS=80, CS=100, bk="Sab", ar
         strat.res$NR.cv[i] <- NR.tmp$se.yst / NR.tmp$yst
         strat.res$NPR.cv[i] <- NPR.tmp$se.yst / NPR.tmp$yst
         
+        # Save the bank-wide per tow estimates
+        bankpertow <- rbind(bankpertow, data.frame(year=years[i], N = N.tmp$`yst`, NR = NR.tmp$`yst`, NPR = NPR.tmp$`yst`, 
+                                                   I=I.tmp$`yst`, IR=IR.tmp$`yst`, IPR=IPR.tmp$`yst`))
         
       } # end if(years[i] = or > year of restratification )
       
@@ -454,8 +465,9 @@ survey.dat.restrat <- function(shf, htwt.fit, years, RS=80, CS=100, bk="Sab", ar
     shf.dat <- list(n.yst=n.yst,w.yst=w.yst,n.stratmeans=n.stratmeans,w.stratmeans=w.stratmeans)
     # Return the data to function calling it.
     
-    if(is.null(user.bins)) return(list(model.dat=model.dat,shf.dat=shf.dat,Strata.obj=Strata.obj))
-    if(!is.null(user.bins)) return(list(model.dat=model.dat,shf.dat=shf.dat,Strata.obj=Strata.obj,bin.names = bnames,user.bins = user.bins))
+    
+    if(is.null(user.bins)) return(list(model.dat=model.dat,shf.dat=shf.dat,Strata.obj=Strata.obj, bankpertow=bankpertow))
+    if(!is.null(user.bins)) return(list(model.dat=model.dat,shf.dat=shf.dat,Strata.obj=Strata.obj,bin.names = bnames,user.bins = user.bins, bankpertow=bankpertow))
     
     model.dat
     
@@ -463,5 +475,5 @@ survey.dat.restrat <- function(shf, htwt.fit, years, RS=80, CS=100, bk="Sab", ar
   
   # Write a file with strata tow assignments just for fun:
   
-  write.csv(paste(direct, ))
+  # write.csv(paste(direct, ))
 } # end survey.dat.restrat()

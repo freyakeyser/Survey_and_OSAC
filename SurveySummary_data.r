@@ -78,7 +78,7 @@
 #                   
 ###############################################################################################################
 
-survey.data <- function(direct = "E:/Offshore scallop/Assessment/", yr.start = 1984, yr = as.numeric(format(Sys.time(), "%Y")) ,
+survey.data <- function(direct = "Y:/Offshore scallop/Assessment/", yr.start = 1984, yr = as.numeric(format(Sys.time(), "%Y")) ,
                         surveys = "all", survey.year= NULL,preprocessed = F,un.ID=un.ID,pwd.ID=pwd.ID,db.con="ptran",
                         season = "both",bins = "bank_default",testing = T)
 {  
@@ -162,7 +162,7 @@ survey.bound.polys<-read.csv(paste0(direct,"Data/Maps/approved/Survey/survey_bou
 survey.detail.polys <- read.csv(paste0(direct,"Data/Maps/approved/Survey/survey_detail_polygons.csv"), 
                                 header=T,stringsAsFactors = F)
 #Read6 Get the survey information for each bank
-survey.info <- read.csv(paste(direct,"data/Survey_data/survey_information",sep=""),
+survey.info <- read.csv(paste(direct,"data/Survey_data/survey_information.csv",sep=""),
                         header=T,stringsAsFactors = F)
 
 #Read7 The boundary between Fully recruited and recruit size classes (RS = Recruit min, CS = Fully recruited (commercial) min)
@@ -346,6 +346,7 @@ merged.survey.obj <- NULL
 # Now get the survey summary results for all the banks...
 for(i in 1:num.surveys)
 {
+  print(surveys[i])
 #  So first thing to do is get the data for the bank....
 bnk <- as.character(unique(subset(all.surv.dat,surv.bank == surveys[i])$bank))
 bank.dat[[bnk]] <- subset(all.surv.dat,surv.bank==surveys[i])
@@ -733,6 +734,7 @@ years <- yr.start:yr
 		  {
 		  
 		  if(bnk=="Sab")  {
+		    require(BIOSurvey2)
 		    survey.obj[[bnk]] <- survey.dat.restrat(shf=surv.Rand[[bnk]], RS=RS, CS=CS, #RS=80 CS=90
 		                                bk=bnk, areas=strata.areas, mw.par="CF",user.bins = bin)	# bin = c(50, 70, 80, 90, 120)
 		    clap.survey.obj[[bnk]] <- survey.dat.restrat(shf=surv.Clap.Rand[[bnk]],htwt.fit=SpatHtWt.fit[[bnk]], RS=RS, CS= CS, 

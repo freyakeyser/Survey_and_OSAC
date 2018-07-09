@@ -123,6 +123,7 @@ survey.dat <- function(shf, htwt.fit, years, RS=80, CS=100, bk="GBa", areas,  mw
 	strat.res <- data.frame(year=years)
 	Strata.obj <- NULL
 	mw <- NULL
+	bankpertow <- NULL
 	
 	
 	# If CS and RS are just one value turn them into a vector the same length as the number of years of data.
@@ -246,6 +247,10 @@ survey.dat <- function(shf, htwt.fit, years, RS=80, CS=100, bk="GBa", areas,  mw
 	  if(err=='str') strat.res$NPR.cv[i] <- NPR.tmp$se.yst / NPR.tmp$yst
 	  if(err=='ran') strat.res$NPR.cv[i] <- sqrt(NPR.tmp$var.ran) / NPR.tmp$yst
 	  
+	  # Save the bank-wide per tow estimates
+	  bankpertow <- rbind(bankpertow, data.frame(year=years[i], N = N.tmp$`yst`, NR = NR.tmp$`yst`, NPR = NPR.tmp$`yst`, 
+	                                             I=I.tmp$`yst`, IR=IR.tmp$`yst`, IPR=IPR.tmp$`yst`))
+	  
 	  # Average weight of fully recruited scallop by year
 	  strat.res$w.bar[i] <- sum(w.yst[i,which(mw.bin==CS[i]):which(mw.bin==200)]) /
 	    sum(n.yst[i,which(mw.bin==CS[i]):which(mw.bin==200)])							
@@ -314,7 +319,7 @@ survey.dat <- function(shf, htwt.fit, years, RS=80, CS=100, bk="GBa", areas,  mw
 	shf.dat <- list(n.yst=n.yst,w.yst=w.yst,n.stratmeans=n.stratmeans,w.stratmeans=w.stratmeans)
 	# Return the data to function calling it.
 	
-	if(is.null(user.bins)) return(list(model.dat=model.dat,shf.dat=shf.dat,Strata.obj=Strata.obj))
-	if(!is.null(user.bins)) return(list(model.dat=model.dat,shf.dat=shf.dat,Strata.obj=Strata.obj,bin.names = bnames,user.bins = user.bins))
+	if(is.null(user.bins)) return(list(model.dat=model.dat,shf.dat=shf.dat,Strata.obj=Strata.obj, bankpertow=bankpertow))
+	if(!is.null(user.bins)) return(list(model.dat=model.dat,shf.dat=shf.dat,Strata.obj=Strata.obj,bin.names = bnames,user.bins = user.bins, bankpertow=bankpertow))
 } # end function
 
