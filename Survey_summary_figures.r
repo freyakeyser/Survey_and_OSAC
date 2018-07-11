@@ -254,11 +254,24 @@ for(i in 1:len)
 
   ###  Now for the plots, first the survey data...
   # Get the  bank survey boundary polygon
-  bound.poly.surv <-as.PolySet(subset(survey.bound.polys,label==banks[i]),projection ="LL")
+  if(banks[i] %in% c("GBa","GBb","BBn","BBs", "GB")) bound.poly.surv <-as.PolySet(subset(survey.bound.polys,
+                                                                                   label==banks[i], 
+                                                                                   select=c("PID", "SID", "POS", "X", "Y", "label")),
+                                                                            projection ="LL")
+  if(banks[i] %in% c("Sab")) bound.poly.surv <-as.PolySet(subset(survey.bound.polys[!(survey.bound.polys$startyear==1900 & survey.bound.polys$label=="Sab"),],
+                                                                 label==banks[i], 
+                                                                 select=c("PID", "SID", "POS", "X", "Y", "label")), 
+                                                          projection ="LL")
+  
   #Detailed survey polygones
-  if(banks[i] %in% c("GBa","GBb","BBn","BBs","Sab")) detail.poly.surv <- as.PolySet(subset(survey.detail.polys,label==banks[i]),projection = "LL")
+  if(banks[i] %in% c("GBa","GBb","BBn","BBs","Sab")) detail.poly.surv <- as.PolySet(subset(survey.detail.polys[!(survey.detail.polys$startyear==1900 & survey.detail.polys$label=="Sab"),],
+                                                                                           label==banks[i], 
+                                                                                           select=c("PID", "SID", "POS", "X", "Y", "label", "Strata_ID")),
+                                                                                    projection = "LL")
+  
   # Get the strata areas.
-  strata.areas <- subset(survey.info,label==banks[i],select =c("PID","towable_area"))
+  if(banks[i] %in% c("GBa","GBb","BBn","BBs")) strata.areas <- subset(survey.info,label==banks[i],select =c("PID","towable_area"))
+  if(banks[i] %in% c("Sab")) strata.areas <- subset(survey.info[!(survey.info$startyear==1900 & survey.info$label=="Sab"),], label==banks[i],select =c("PID","towable_area"))
   #Get all the details of the survey strata
   surv.info <- subset(survey.info,label== banks[i])
   
@@ -336,7 +349,7 @@ for(i in 1:len)
       g.tmp$X[g.tmp$X > X.range[2]] <- X.range[2]
       g.tmp$Y[g.tmp$Y > Y.range[2]] <- Y.range[2]
       g.tmp$Y[g.tmp$Y < Y.range[1]] <- Y.range[1]
-      # Now I want to insert a segemnt into the boundary to run a diagonal line from around 43°9/-66.755 to 43/-66°24
+      # Now I want to insert a segemnt into the boundary to run a diagonal line from around 43?9/-66.755 to 43/-66?24
       g.tmp[2,] <- c(5,2,-66.4,Y.range[1],"SFA26","Ger")
       g.tmp <- as.data.frame(rbind(g.tmp[c(1,2),],c(5,2,X.range[1],43.15,"SFA26","Ger"),g.tmp[3:nrow(g.tmp),]))
       for(k in 1:4) g.tmp[,k] <- as.numeric(g.tmp[,k]) # Silly rbind making everything characters...
@@ -458,6 +471,7 @@ for(i in 1:len)
             stk <- inla.stack(tag="est",data=list(y = tmp.dat$com, link=1L),
                               effects=list(a0 = rep(1, nrow(tmp.dat)), s = 1:spde$n.spde),
                               A = list(1, A))
+            print(stk)
                         # This is the INLA model itself
             mod <- inla(formula3, family=family1, data = inla.stack.data(stk),#control.family= control.family1,
                         control.predictor=list(A=inla.stack.A(stk),link=link, compute=TRUE))

@@ -319,6 +319,8 @@ survey.dat <- function(shf, htwt.fit, years, RS=80, CS=100, bk="GBa", areas,  mw
 	shf.dat <- list(n.yst=n.yst,w.yst=w.yst,n.stratmeans=n.stratmeans,w.stratmeans=w.stratmeans)
 	# Return the data to function calling it.
 	
+	model.dat$year <- as.numeric(as.character(model.dat$year))
+	
 	if(is.null(user.bins)) return(list(model.dat=model.dat,shf.dat=shf.dat,Strata.obj=Strata.obj, bankpertow=bankpertow))
 	if(!is.null(user.bins)) return(list(model.dat=model.dat,shf.dat=shf.dat,Strata.obj=Strata.obj,bin.names = bnames,user.bins = user.bins, bankpertow=bankpertow))
 } # end function
