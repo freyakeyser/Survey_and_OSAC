@@ -147,6 +147,7 @@ survey.dat.restrat <- function(shf, htwt.fit, years, RS=80, CS=100, bk="Sab", ar
     w.stratmeans <-list(NULL)
     strat.res <- data.frame(year=years)
     Strata.obj <- NULL
+    Domain.obj <- NULL
     mw <- NULL
     bankpertow <- NULL
     
@@ -294,12 +295,12 @@ survey.dat.restrat <- function(shf, htwt.fit, years, RS=80, CS=100, bk="Sab", ar
         # out.domain CONTAINS STRATIFIED ESTIMATES & VARIANCES (not CVs)
        
         # Step 5: Put the appropriate biomass and count values into respective Strata.obj list objects
-        Strata.obj$I[[i]] <- out.domain$yst.w.I[i]
-        Strata.obj$IR[[i]] <- out.domain$yst.w.IR[i]
-        Strata.obj$IPR[[i]] <- out.domain$yst.w.IPR[i]
-        Strata.obj$N[[i]] <- out.domain$yst.n.I[i]
-        Strata.obj$NR[[i]] <- out.domain$yst.n.IR[i]
-        Strata.obj$NPR[[i]] <- out.domain$yst.n.IPR[i]
+        Domain.obj$I[[i]] <- out.domain$yst.w.I[i]
+        Domain.obj$IR[[i]] <- out.domain$yst.w.IR[i]
+        Domain.obj$IPR[[i]] <- out.domain$yst.w.IPR[i]
+        Domain.obj$N[[i]] <- out.domain$yst.n.I[i]
+        Domain.obj$NR[[i]] <- out.domain$yst.n.IR[i]
+        Domain.obj$NPR[[i]] <- out.domain$yst.n.IPR[i]
         
         # Step 6: Put the total number of tows into the strat.res object
         strat.res$n[i] <- sum(scall.dom.I$nh)
@@ -324,6 +325,14 @@ survey.dat.restrat <- function(shf, htwt.fit, years, RS=80, CS=100, bk="Sab", ar
         bankpertow <- rbind(bankpertow, data.frame(year=years[i], N = N.tmp[[2]]$yst, NR = NR.tmp[[2]]$yst, NPR = NPR.tmp[[2]]$yst, 
                                                    I=I.tmp[[2]]$yst, IR=IR.tmp[[2]]$yst, IPR=IPR.tmp[[2]]$yst))
        
+        # We do not have Strata.obj information for these years since PEDstrata is no longer used
+        Strata.obj$I[[i]] <- list(NA)
+        Strata.obj$IR[[i]] <- list(NA)
+        Strata.obj$IPR[[i]] <- list(NA)
+        Strata.obj$N[[i]] <- list(NA)
+        Strata.obj$NR[[i]] <- list(NA)
+        Strata.obj$NPR[[i]] <- list(NA)
+        
       }# end if(years[i] < year of restratification )
       
       # if the year is after 2018, then we can just run PEDstrata as normal, since the survey was conducted using the current strata.
@@ -332,25 +341,31 @@ survey.dat.restrat <- function(shf, htwt.fit, years, RS=80, CS=100, bk="Sab", ar
         # Step 1: Calculate stratified estimates of biomass and abundances for 3 size categories. Save the summary objects, which contain a number of useful survey design results and optimization summaries.
         # Step 1a: PEDstrata requires that the column name be "Strata" in your strata.group object. So do this, and then calculate.
         names(domain.obj)[1] <- "Strata"
-        I.tmp <- summary(PEDstrata(w, domain.obj, 'STRATA.ID.NEW', w$com), effic = T)
-        IR.tmp <- summary(PEDstrata(w, domain.obj, 'STRATA.ID.NEW', w$rec), effic = T)
-        IPR.tmp <- summary(PEDstrata(w, domain.obj, 'STRATA.ID.NEW', w$pre), effic = T)
-        N.tmp <- summary(PEDstrata(num, domain.obj, 'STRATA.ID.NEW', num$com), effic = T)
-        NR.tmp <- summary(PEDstrata(num, domain.obj, 'STRATA.ID.NEW', num$rec), effic = T)
-        NPR.tmp <- summary(PEDstrata(num, domain.obj, 'STRATA.ID.NEW', num$pre), effic = T)
+        Strata.obj$I[[i]] <- PEDstrata(w, domain.obj, 'STRATA.ID.NEW', w$com)
+        Strata.obj$IR[[i]] <- PEDstrata(w, domain.obj, 'STRATA.ID.NEW', w$rec)
+        Strata.obj$IPR[[i]] <- PEDstrata(w, domain.obj, 'STRATA.ID.NEW', w$pre)
+        Strata.obj$N[[i]] <- PEDstrata(num, domain.obj, 'STRATA.ID.NEW', num$com)
+        Strata.obj$NR[[i]] <- PEDstrata(num, domain.obj, 'STRATA.ID.NEW', num$rec)
+        Strata.obj$NPR[[i]] <- PEDstrata(num, domain.obj, 'STRATA.ID.NEW', num$pre)
+        
+        I.tmp <- summary(Strata.obj$I[[i]], effic = T)
+        IR.tmp <- summary(Strata.obj$IR[[i]], effic = T)
+        IPR.tmp <- summary(Strata.obj$IPR[[i]], effic = T)
+        N.tmp <- summary(Strata.obj$N[[i]], effic = T)
+        NR.tmp <- summary(Strata.obj$NR[[i]], effic = T)
+        NPR.tmp <- summary(Strata.obj$NPR[[i]], effic = T)
         
         # Step 2: Store the stratified estimates in Strata.obj. Note that the Strata.obj for Sable will ONLY contain the yst
         # values now, and will therefore not match the Strata.obj for other banks.
-        Strata.obj$I[[i]] <- I.tmp$yst
-        Strata.obj$IR[[i]] <- IR.tmp$yst
-        Strata.obj$IPR[[i]] <- IPR.tmp$yst
-        Strata.obj$N[[i]] <- N.tmp$yst
-        Strata.obj$NR[[i]] <- NR.tmp$yst
-        Strata.obj$NPR[[i]] <- NPR.tmp$yst
+        Domain.obj$I[[i]] <- I.tmp$yst
+        Domain.obj$IR[[i]] <- IR.tmp$yst
+        Domain.obj$IPR[[i]] <- IPR.tmp$yst
+        Domain.obj$N[[i]] <- N.tmp$yst
+        Domain.obj$NR[[i]] <- NR.tmp$yst
+        Domain.obj$NPR[[i]] <- NPR.tmp$yst
         
         # Step 3: Put the total number of tows in strat.res object
-        forNtows <- PEDstrata(w, domain.obj, 'STRATA.ID.NEW', w$com)
-        strat.res$n[i] <- sum(forNtows$nh)
+        strat.res$n[i] <- sum(Strata.obj$I[[i]]$nh)
         
         # Step 4: Calculate Biomass (tonnes) and abundance (millions) estimates for the bank
         strat.res$I[i] <- I.tmp$yst * sum(N.tu) / 10^6			#g to t
@@ -492,8 +507,8 @@ survey.dat.restrat <- function(shf, htwt.fit, years, RS=80, CS=100, bk="Sab", ar
     # Return the data to function calling it.
     
     
-    if(is.null(user.bins)) return(list(model.dat=model.dat,shf.dat=shf.dat,Strata.obj=Strata.obj, bankpertow=bankpertow))
-    if(!is.null(user.bins)) return(list(model.dat=model.dat,shf.dat=shf.dat,Strata.obj=Strata.obj,bin.names = bnames,user.bins = user.bins, bankpertow=bankpertow))
+    if(is.null(user.bins)) return(list(model.dat=model.dat,shf.dat=shf.dat,Strata.obj=Strata.obj, Domain.obj=Domain.obj, bankpertow=bankpertow))
+    if(!is.null(user.bins)) return(list(model.dat=model.dat,shf.dat=shf.dat,Strata.obj=Strata.obj, Domain.obj=Domain.obj, bin.names = bnames,user.bins = user.bins, bankpertow=bankpertow))
     
     model.dat
     
