@@ -112,7 +112,9 @@ survey.figs <- function(plots = c("PR-spatial","Rec-spatial","FR-spatial","CF-sp
                        banks = c("BBn" ,"BBs", "Ger", "Mid", "Sab", "GBb", "GBa","GB"),
                        s.res = "low",add.scale = F, 
                        direct = "Y:/Offshore scallop/Assessment/", yr = as.numeric(format(Sys.time(), "%Y"))  ,
-                       add.title = T,fig="screen",season="both",INLA = "run" ,contour =F)
+                       add.title = T,fig="screen",season="both",INLA = "run" ,contour =F, offset=c(0.12, 0.12, 0.12, 
+                                                                                                   0.12, 0.10, 0.15,
+                                                                                                   0.15, 0.35))
 { 
   tmp.dir <- direct ; tmp.season <- season # I need this so that the directory isn't overwritten when I load the below...
   # Load the appropriate data.
@@ -345,6 +347,7 @@ for(i in 1:len)
       Y.range <- range(g.bnds$Y,na.rm=T)
       X.range <- range(g.bnds$X,na.rm=T)
       g.tmp <- newAreaPolys[newAreaPolys$label=="SFA26",]
+      g.tmp <- g.tmp[, c("PID", "POS", "X", "Y", "label", "bank")]
       g.tmp$X[g.tmp$X < X.range[1]] <- X.range[1]
       g.tmp$X[g.tmp$X > X.range[2]] <- X.range[2]
       g.tmp$Y[g.tmp$Y > Y.range[2]] <- Y.range[2]
@@ -395,8 +398,9 @@ for(i in 1:len)
       # This is how the mesh and A matrix are constructed
       # Build the mesh, for our purposes I'm hopeful this should do the trick, the offset makes the area a bit larger so the main predictions 
       #  should cover our entire survey area.
-      if(banks[i] != "GB") mesh <- inla.mesh.2d(loc, max.edge=c(0.03,0.075), offset=0.15)
-      if(banks[i] == "GB") mesh <- inla.mesh.2d(loc, max.edge=c(0.04,0.075), offset=0.35)
+      # browser()
+      if(banks[i] != "GB") mesh <- inla.mesh.2d(loc, max.edge=c(0.03,0.075), offset=offset[i])
+      if(banks[i] == "GB") mesh <- inla.mesh.2d(loc, max.edge=c(0.04,0.075), offset=offset[i])
       #windows(11,11) ; plot(mesh) ; plot(bound.poly.surv.sp,add=T,lwd=2)
      
       # Now make the A matrix
@@ -491,6 +495,7 @@ for(i in 1:len)
           if(seed.n.spatial.maps[k] == "MC-spatial")      
           {
             # This is the stack for the INLA model
+            #browser()
             stk <- inla.stack(tag="est",data=list(y = tmp.cf$meat.count, link=1L),
                               effects=list(a0 = rep(1, nrow(tmp.cf)), s = 1:spde$n.spde),
                               A = list(1, A.cf))
