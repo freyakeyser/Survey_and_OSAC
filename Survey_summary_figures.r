@@ -1405,7 +1405,7 @@ for(i in 1:len)
                                                         length(survey.obj[[banks[i]]][[1]]$year)]
         s.size <- survey.obj[[banks[i]]][[1]]$n[survey.obj[[banks[i]]][[1]]$year %in% shf.years]
         shf.plt(survey.obj[[banks[i]]],from='surv',yr=shf.years, col1='grey80',col2=1,rel=F,
-            recline=c(RS,CS),add.title = T,titl = SHF.title,cex.mn=3,sample.size = s.size)	
+            recline=c(RS,CS),add.title = T,titl = SHF.title,cex.mn=3,sample.size = T)	
         if(fig != "screen") dev.off()
       } # end  if(banks[i] != "Ger")
     
@@ -1414,7 +1414,7 @@ for(i in 1:len)
         shf.years <-  lined.survey.obj[[1]]$year[(length(lined.survey.obj[[1]]$year)-6):length(lined.survey.obj[[1]]$year)]
         s.size <- lined.survey.obj[[1]]$n[lined.survey.obj[[1]]$year %in% shf.years]
         shf.plt(lined.survey.obj,from='surv',yr=shf.years, col1='grey80',col2=1,rel=F,
-                recline=c(RS,CS),add.title = T,titl = SHF.title,cex.mn=3,sample.size = s.size)	
+                recline=c(RS,CS),add.title = T,titl = SHF.title,cex.mn=3,sample.size = T)	
         if(fig != "screen") dev.off()
         # We also want to grab the matched tows figure
         s.size <- matched.survey.obj[[1]]$n
@@ -1427,7 +1427,7 @@ for(i in 1:len)
         if(add.title == F) SHFm.title <- ""
         if(add.title == T) SHFm.title <- "SHF - Repeated Tows (Ger)"
         shf.plt(matched.survey.obj,from='surv',yr=(yr-1):yr,col1='grey80',col2=1,rel=F,rows=2,
-                recline=c(RS,CS),add.title = T,titl = SHFm.title,cex.mn=2, sample.size = s.size)	   
+                recline=c(RS,CS),add.title = T,titl = SHFm.title,cex.mn=2, sample.size = T)	   
         if(fig != "screen") dev.off()
       } # end if(banks[i]=="Ger")
     } # end if(any(plots=="SHF"))    
@@ -1460,7 +1460,7 @@ for(i in 1:len)
                                                       length(survey.obj[[banks[i]]][[1]]$year)]
       s.size <- survey.obj[[banks[i]]][[1]]$n[survey.obj[[banks[i]]][[1]]$year %in% shf.years]
       shf.plt(survey.obj[[banks[i]]],from='surv',yr=shf.years, col1='grey80',col2=1,rel=F, select=70,
-              recline=c(RS,CS),add.title = T,titl = SHF.title,cex.mn=3,sample.size = s.size)	
+              recline=c(RS,CS),add.title = T,titl = SHF.title,cex.mn=3,sample.size = T)	
       if(fig != "screen") dev.off()
     } # end  if(banks[i] != "Ger")
     
@@ -1469,7 +1469,7 @@ for(i in 1:len)
       shf.years <-  lined.survey.obj[[1]]$year[(length(lined.survey.obj[[1]]$year)-6):length(lined.survey.obj[[1]]$year)]
       s.size <- lined.survey.obj[[1]]$n[lined.survey.obj[[1]]$year %in% shf.years]
       shf.plt(lined.survey.obj,from='surv',yr=shf.years, col1='grey80',col2=1,rel=F,select=70,
-              recline=c(RS,CS),add.title = T,titl = SHF.title,cex.mn=3,sample.size = s.size)	
+              recline=c(RS,CS),add.title = T,titl = SHF.title,cex.mn=3,sample.size = T)	
       if(fig != "screen") dev.off()
     } # end if(banks[i]=="Ger")
   } # end if(any(plots=="SHF-large"))    
@@ -1499,7 +1499,7 @@ for(i in 1:len)
                                                       length(survey.obj[[banks[i]]][[1]]$year)]
       s.size <- survey.obj[[banks[i]]][[1]]$n[survey.obj[[banks[i]]][[1]]$year %in% shf.years]
       shf.plt(survey.obj[[banks[i]]],from='surv',yr=shf.years, col1='grey80',col2=1,rel=F, split=60,
-              recline=c(RS,CS),add.title = T,titl = SHF.title,cex.mn=3,sample.size = s.size)	
+              recline=c(RS,CS),add.title = T,titl = SHF.title,cex.mn=3,sample.size = T)	
       if(fig != "screen") dev.off()
     } # end  if(banks[i] != "Ger")
     
@@ -1508,7 +1508,7 @@ for(i in 1:len)
       shf.years <-  lined.survey.obj[[1]]$year[(length(lined.survey.obj[[1]]$year)-6):length(lined.survey.obj[[1]]$year)]
       s.size <- lined.survey.obj[[1]]$n[lined.survey.obj[[1]]$year %in% shf.years]
       shf.plt(lined.survey.obj,from='surv',yr=shf.years, col1='grey80',col2=1,rel=F, split=60,
-              recline=c(RS,CS),add.title = T,titl = SHF.title,cex.mn=3,sample.size = s.size)	
+              recline=c(RS,CS),add.title = T,titl = SHF.title,cex.mn=3,sample.size = T)	
       if(fig != "screen") dev.off()
     } # end if(banks[i]=="Ger")
   } # end if(any(plots=="SHF-split"))    
@@ -1841,7 +1841,7 @@ for(i in 1:len)
         if(fig == "screen") windows(8.5,11)
         
         shf.plt(boxy,from='surv',yr=shf.years, col1='grey80',col2=1,rel=F,
-                recline=c(RS,CS),add.title = add.title,titl = seedbox.SHF.title,cex.mn=3,sample.size = s.size)	
+                recline=c(RS,CS),add.title = add.title,titl = seedbox.SHF.title,cex.mn=3,sample.size = T)	
         if(fig != "screen") dev.off()
         
         
@@ -1852,7 +1852,7 @@ for(i in 1:len)
                              width = 8.5, height = 11) 
         if(fig == "screen") windows(8.5,11)
         shf.plt(boxy,from='surv',yr=shf.years, col1='grey80',col2=1,rel=F,select=60,
-                recline=c(RS,CS),add.title = add.title,titl = seedbox.SHF.title,cex.mn=3,sample.size = s.size)
+                recline=c(RS,CS),add.title = add.title,titl = seedbox.SHF.title,cex.mn=3,sample.size = T)
         if(fig != "screen") dev.off()
         
         # Now do the SHF with the panels split classes...
@@ -1862,7 +1862,7 @@ for(i in 1:len)
                              width = 8.5, height = 11) 
         if(fig == "screen") windows(8.5,11)
         shf.plt(boxy,from='surv',yr=shf.years, col1='grey80',col2=1,rel=F,split=70,
-                recline=c(RS,CS),add.title = add.title,titl = seedbox.SHF.title,cex.mn=3,sample.size = s.size)
+                recline=c(RS,CS),add.title = add.title,titl = seedbox.SHF.title,cex.mn=3,sample.size = T)
         if(fig != "screen") dev.off()
         
         # A zoomed in view of the box in question with survey strata...
