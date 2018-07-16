@@ -1654,6 +1654,10 @@ for(i in 1:len)
     # I also want to remake the previsou year's breakdown plot, this will go in the current years folder but will
     # be the same y-scale (there is no guarantee that the plot made last year will be, likely it won't).  It's a bit
     # clunky but basically this is the same plot as last year but re-scaled for comparative purposes...
+    
+    # but only do it if the survey went to that bank the previous year! 
+    if(is.element((yr-1), unique(survey.obj[[banks[i]]]$bankpertow$year))=="TRUE"){ 
+    
     if(fig == "screen") windows(11,8.5)
     if(fig == "png") png(paste(plot.dir,"breakdown-",(yr-1),".png",sep=""),units="in",
                          width = 11,height = 8.5,res=420,bg = "transparent")
@@ -1662,6 +1666,7 @@ for(i in 1:len)
     {
       # To get the ymax the same between succesive years I want to do this...
       breakdown(survey.obj[[banks[i]]],yr=(yr-1),mc=mc,cx.axs=1,y1max = ymax,add.title = F)
+      
     } # end if(banks[i] != "Ger") 
     
     # Using the lined surevye object for German bank...
@@ -1672,7 +1677,7 @@ for(i in 1:len)
     
     if(add.title ==T) title(paste("Biomass & Meat Count by Height (",banks[i],"-",(yr-1),")",sep=""), cex.main=2,adj=0.35)
     if(fig != "screen") dev.off()   
-    
+    }
     #} # end if(banks[i] %in% c("BBn" , "GBb", "GBa"))
     
   }  # end iif(any(plots== "breakdown"))
