@@ -119,9 +119,9 @@ survey.dat.restrat <- function(shf, htwt.fit, years, RS=80, CS=100, bk="Sab", ar
       {
         if(p > 1 && p < length(user.bins)+1)
         {
-          bnames[p] <- paste0("bin_",user.bins[p-1],"_",user.bins[p])
-          mean.names[p] <- paste0("mean_",user.bins[p-1],"_",user.bins[p])
-          CV.names[p] <- paste0("CV_",user.bins[p-1],"_",user.bins[p])
+          bnames[p] <- paste0("bin_",user.bins[p-1],"-",user.bins[p])
+          mean.names[p] <- paste0("mean_",user.bins[p-1],"-",user.bins[p])
+          CV.names[p] <- paste0("CV_",user.bins[p-1],"-",user.bins[p])
         } # end if(p > 1 && p < length(user.bins)+1)
         
         if(p == length(user.bins)+1)
@@ -145,6 +145,7 @@ survey.dat.restrat <- function(shf, htwt.fit, years, RS=80, CS=100, bk="Sab", ar
     n.yst <- w.yst
     n.stratmeans <-list(NULL)
     w.stratmeans <-list(NULL)
+    avgsizepertow <- list(NULL)
     strat.res <- data.frame(year=years)
     Strata.obj <- NULL
     Domain.obj <- NULL
@@ -431,6 +432,11 @@ survey.dat.restrat <- function(shf, htwt.fit, years, RS=80, CS=100, bk="Sab", ar
                                   w.bar=strat.res$w.bar[i], l.bar=strat.res$l.bar[i],
                                   l.k=strat.res$l.k[i], w.k=strat.res$w.k[i])
       
+      # Average size per tow
+      ## total caught in tow
+      num$tot <- rowSums(num[,1:40])
+      avgsizepertow[[i]] <- rowSums(t(apply(num[,1:40], 1, function(x) mw.bin*x)),na.rm=T)/num$tot
+      
       # So I need to get the results for the user specified SH bins if they are requested.  
       if(!is.null(user.bins))
       {
@@ -503,7 +509,7 @@ survey.dat.restrat <- function(shf, htwt.fit, years, RS=80, CS=100, bk="Sab", ar
     if(is.null(user.bins))  model.dat <-  strat.res
     
     # Data for shf plots used in the survey summary
-    shf.dat <- list(n.yst=n.yst,w.yst=w.yst,n.stratmeans=n.stratmeans,w.stratmeans=w.stratmeans)
+    shf.dat <- list(n.yst=n.yst,w.yst=w.yst,n.stratmeans=n.stratmeans,w.stratmeans=w.stratmeans,avgsizepertow=avgsizepertow)
     # Return the data to function calling it.
     
     model.dat$year <- as.numeric(as.character(model.dat$year))

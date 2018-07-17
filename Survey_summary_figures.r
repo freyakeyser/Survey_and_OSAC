@@ -518,6 +518,7 @@ for(i in 1:len)
           # Now that this is done we need to make a prediction grid for projection onto our mesh,
           proj <- inla.mesh.projector(mesh,xlim=xyl[1, ], ylim=xyl[2,],dims = s.res) # 500 x 500 gives very fine results but is slow.        
           # Then make a matrix of the correct dimension, first for the poisson models
+          
           if(seed.n.spatial.maps[k] %in% c("FR-spatial","PR-spatial","Rec-spatial","Clap-spatial")) mod.res[[seed.n.spatial.maps[k]]] <- 
                                                                           inla.mesh.project(proj, exp(mod$summary.random$s$mean + mod$summary.fixed$mean))
           # Now for the Gaussian models.
@@ -584,7 +585,7 @@ for(i in 1:len)
         } # End for(k in 1:num.bins)
       } #end if(length(grep("run",INLA)) > 0)
     }# end i if(any(plots == "user.SH.bins") || length(grep("run",INLA)) > 0)
-    
+
     # Now here we can save the results of all INLA runs for each bank rather than having to run these everytime which can be rather slow
     # Results are only saved if the option 'run.full' is chosen
     if(INLA == 'run.full') 
@@ -935,7 +936,7 @@ for(i in 1:len)
   #Do we want to plot the survey?
   if(any(plots %in% "Survey"))
   {
-    
+    browser()
     # For this figure we want full bank names, this is ugly hack but does the trick.
     full.names <- data.frame(abrv = c("SPB","Ban","Mid","Sab","Ger","BBs","BBn","GBa","GBb","GB"),
                              full = c("St. Pierre Bank","Banquereau","Middle Bank","Sable Bank","German Bank","Browns Bank South",
@@ -962,7 +963,7 @@ for(i in 1:len)
       # I need to move the scale bar for Sable and GBb...
       if(banks[i] %in% c("Sab","GBb")) 
       {
-        ScallopMap(banks[i],poly.lst=list(detail.poly.surv,surv.info),direct = direct,cex.mn=2, boundries="offshore",
+        ScallopMap(banks[i],poly.lst=list(detail.poly.surv,surv.info[surv.info$startyear==max(surv.info$startyear),]),direct = direct,cex.mn=2, boundries="offshore",
                                                   plot.bathy=T,plot.boundries = T,bathy.source="quick", xlab="",ylab="",
                                                   nafo.bord = F,nafo.lab = F,title=survey.title,dec.deg = F,add.scale = F)
         # This will put the scale bottom left I think...
