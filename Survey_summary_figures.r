@@ -936,7 +936,6 @@ for(i in 1:len)
   #Do we want to plot the survey?
   if(any(plots %in% "Survey"))
   {
-    browser()
     # For this figure we want full bank names, this is ugly hack but does the trick.
     full.names <- data.frame(abrv = c("SPB","Ban","Mid","Sab","Ger","BBs","BBn","GBa","GBb","GB"),
                              full = c("St. Pierre Bank","Banquereau","Middle Bank","Sable Bank","German Bank","Browns Bank South",
@@ -967,8 +966,8 @@ for(i in 1:len)
                                                   plot.bathy=T,plot.boundries = T,bathy.source="quick", xlab="",ylab="",
                                                   nafo.bord = F,nafo.lab = F,title=survey.title,dec.deg = F,add.scale = F)
         # This will put the scale bottom left I think...
-        if(add.scale == T) maps::map.scale(min(smap.xlim)+0.1*(max(smap.xlim)-min(smap.xlim)),
-                                           min(smap.ylim)+0.1*(max(smap.ylim)-min(smap.ylim)),relwidth = 0.15,cex=0.6,ratio=F)
+        #if(add.scale == T) maps::map.scale(min(smap.xlim)+0.1*(max(smap.xlim)-min(smap.xlim)),
+                                           #min(smap.ylim)+0.1*(max(smap.ylim)-min(smap.ylim)),relwidth = 0.15,cex=0.6,ratio=F)
       } # end if(banks[i] %in% c("Sab","GBb")) 
     } # end if(length(strata.areas[,1]) > 0)
     # For the banks without any strata
@@ -1064,9 +1063,23 @@ for(i in 1:len)
              pt.bg = c("darkorange","yellow"),pch=c(24,22),bg = NA,inset=0.01,box.col=NA)
     } # end if(banks[i] == "Sab" || banks[i] == "Mid"|| banks[i] == "BBs" || banks[i] == "Ban"|| banks[i] == "GBb" || banks[i] == "GB") 
     
+    if(banks[i] == "Sab") 
+    {
+      legend("topleft",legend=surv.info$PName,fill=surv.info$col,bty='n',cex=1, title = "Strata")
+      legend("top",legend = round(surv.info$area_km2),
+             fill=c(surv.info$col),border=c(rep('black',length(surv.info$PName))),
+             pch=c(rep(NA,length(surv.info$PName))),title = expression(paste("Area - ",km^2,"")),title.adj=0.1,
+             pt.bg = c(rep(NA,length(surv.info$PName))),col='black',bty='n')
+      
+      legend("topright",legend = as.numeric(with(subset(surv.Live[[banks[i]]],
+                                                        year== yr & random ==1),
+                                                 tapply(tow,Strata_ID_NEW,length))),
+             fill=c(surv.info$col),border=c(rep('black',length(surv.info$PName))),
+             pch=c(rep(NA,length(surv.info$PName))),title = "Number of tows",title.adj=0.1,
+             pt.bg = c(rep(NA,length(surv.info$PName))),col='black',bty='n')
+    } 
     
-    
-    if(banks[i] == "Sab" ||  banks[i] == "GBb") 
+    if(banks[i] == "GBb") 
     {
       legend("topleft",legend=surv.info$PName,fill=surv.info$col,bty='n',cex=1, title = "Strata")
       legend("top",legend = round(surv.info$area_km2),
