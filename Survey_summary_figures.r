@@ -1073,7 +1073,7 @@ for(i in 1:len)
       
       legend("topright",legend = as.numeric(with(subset(surv.Live[[banks[i]]],
                                                         year== yr & random ==1),
-                                                 tapply(tow,Strata_ID_NEW,length))),
+                                                 tapply(tow,Strata_ID_new,length))),
              fill=c(surv.info$col),border=c(rep('black',length(surv.info$PName))),
              pch=c(rep(NA,length(surv.info$PName))),title = "Number of tows",title.adj=0.1,
              pt.bg = c(rep(NA,length(surv.info$PName))),col='black',bty='n')
