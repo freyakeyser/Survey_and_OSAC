@@ -43,7 +43,7 @@ breakdown<-function(surv.obj,yr=2010,CS=NULL,RS = NULL,xlim=NULL,y1max=NULL,y2ma
                     mc=40,title=paste("Breakdown",yr),cx.axs=1.5,cx.lab=1.5,cx.mn=2,add.title=T)
 {
 	
-  	# Grab the biomass and numbers for each bin size from the survey, this is in kg per tow and number per tow.
+  # Grab the biomass and numbers for each bin size from the survey, this is in kg per tow and number per tow.
   	bm<-surv.obj$shf.dat$w.yst[which(surv.obj[[1]]$year==yr),which(seq(5,200,5) >= 5)]/1000
   	num<-surv.obj$shf.dat$n.yst[which(surv.obj[[1]]$year==yr),which(seq(5,200,5) >= 5)]
   	# Get the Commercial size if it hasn't been specified
@@ -84,7 +84,6 @@ breakdown<-function(surv.obj,yr=2010,CS=NULL,RS = NULL,xlim=NULL,y1max=NULL,y2ma
 	# Specifiy the y axis for the meat count if not done already.  Using xlim pick a meat count in line with the data.
 	if(is.null(y2max)==T) y2max<-max(count[(min(xlim,na.rm=T)/5-1):length(vec)],na.rm=T)*1.1
 	# And plot the data
-	
 	plot(vec+2.5,count,type='o',pch=16,cex=1,axes=F,xlab='',ylab='',xlim=xlim,col='firebrick',ylim=c(0,y2max),lwd=2,main="")
 	# We also should be adding a vertical lines to show our Fully recruited and recruit dvision falls at.
 	abline(v=CS,lwd=2,col="blue",lty=1)
