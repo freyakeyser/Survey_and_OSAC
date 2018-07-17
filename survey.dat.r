@@ -266,11 +266,6 @@ survey.dat <- function(shf, htwt.fit, years, RS=80, CS=100, bk="GBa", areas,  mw
 	  strat.res$w.k[i] <- sum(w.yst[i,which(mw.bin==RS[i]):which(mw.bin==CS[i]-5)]) /
 	    sum(n.yst[i,which(mw.bin==RS[i]):which(mw.bin==CS[i]-5)])		
 	  
-	  # Average size per tow
-	  ## total caught in tow
-	  num$tot <- rowSums(num[,1:40])
-	  avgsizepertow[[i]] <- rowSums(t(apply(num[,1:40], 1, function(x) mw.bin*x)),na.rm=T)/num$tot
-	  
 	  # So I need to get the results for the user specified SH bins if they are requested.
 	  if(!is.null(user.bins))
 	  {
