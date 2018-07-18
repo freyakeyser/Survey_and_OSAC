@@ -728,10 +728,10 @@ years <- yr.start:yr
 		  lined.survey.obj$model.dat$RS <- RS
 		}# end if(bnk == "Ger")
 		  
-    # average size per tow
-		surv.Live[[bnk]]$avgsizepertow <- rowSums(t(apply(surv.Live[[bnk]][,which(names(surv.Live[[bnk]]) %in% paste0("h",mw.bin))], 1, function(x) mw.bin*x)),na.rm=T)/surv.Live[[bnk]]$tot
-		surv.Clap[[bnk]]$avgsizepertow <- rowSums(t(apply(surv.Clap[[bnk]][,which(names(surv.Clap[[bnk]]) %in% paste0("h",mw.bin))], 1, function(x) mw.bin*x)),na.rm=T)/surv.Clap[[bnk]]$tot
-		
+#     # average size per tow
+# 		surv.Live[[bnk]]$avgsizepertow <- rowSums(t(apply(surv.Live[[bnk]][,which(names(surv.Live[[bnk]]) %in% paste0("h",mw.bin))], 1, function(x) mw.bin*x)),na.rm=T)/surv.Live[[bnk]]$tot
+# 		surv.Clap[[bnk]]$avgsizepertow <- rowSums(t(apply(surv.Clap[[bnk]][,which(names(surv.Clap[[bnk]]) %in% paste0("h",mw.bin))], 1, function(x) mw.bin*x)),na.rm=T)/surv.Clap[[bnk]]$tot
+# 		
 		# Get the survey estimates for the banks for which we have strata. 
 		if(bnk != "Ger" && bnk != "Mid" && bnk != "GB") 
 		  {

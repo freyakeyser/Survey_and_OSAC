@@ -274,6 +274,7 @@ for(i in 1:len)
   # Get the strata areas.
   if(banks[i] %in% c("GBa","GBb","BBn","BBs")) strata.areas <- subset(survey.info,label==banks[i],select =c("PID","towable_area"))
   if(banks[i] %in% c("Sab")) strata.areas <- subset(survey.info[!(survey.info$startyear==1900 & survey.info$label=="Sab"),], label==banks[i],select =c("PID","towable_area"))
+  if(banks[i] %in% c("GB", "Mid", "Ger")) strata.areas <- NULL
   #Get all the details of the survey strata
   surv.info <- subset(survey.info,label== banks[i])
   
@@ -755,7 +756,6 @@ for(i in 1:len)
           base.lvls=c(0,5,10,50,100,500,1000,2000,5000,10000,20000,50000,1e6)
           cols <- c(rev(plasma(length(base.lvls[base.lvls < 2000]),alpha=0.7,begin=0.6,end=1)),
                     rev(plasma(length(base.lvls[base.lvls > 1000])-1,alpha=0.8,begin=0.1,end=0.5)))
-
           if(length(grep("bm",maps.to.make[m])) > 0) # if we are looking at biomass figures...
           {
             base.lvls= c(0,0.005,0.01,0.05,0.1,0.5,1,2,5,10,20,50,1000)
@@ -773,6 +773,7 @@ for(i in 1:len)
                                paste(lvls[length(lvls)-1],'-',lvls[max.lvl],sep='')))
           # Now set up the figure titles, different title depending on the spatial map here.
           count = count + 1
+          
           if(count > num.bins/2) count = 1 # This resets the counter to start over for the Biomass plots.
           # Now I can get a nice name for the figure
           if(count == 1) fig.title.start <- paste("Scallops 0-",user.bins[count]-1," mm (",sep="")
@@ -797,20 +798,23 @@ for(i in 1:len)
         ############  End prepartion of levels and figure annotations for spatial figures#######
         ############  End prepartion of levels and figure annotations for spatial figures###
         
-        
         ######## Produce the figure######## Produce the figure######## Produce the figure######## Produce the figure
         ######## Produce the figure######## Produce the figure######## Produce the figure######## Produce the figure
         # Do we want to save the figure to a file or just output to the screen?  
         if(fig == "png") png(paste(plot.dir,maps.to.make[m],".png",sep=""),units="in",width = 11,height = 8.5,res=420,bg = "transparent")
         if(fig == "pdf") pdf(paste(plot.dir,maps.to.make[m],".pdf",sep=""),width = 11,height = 8.5,bg = "transparent")
         if(fig == "screen") windows(11,8.5)
+        
         par(mfrow=c(1,1))
         # This is one figure to rule all 
         ScallopMap(banks[i],title=fig.title,bathy.source=bath,isobath = iso,plot.bathy=T,plot.boundries=T,boundries="offshore",
                    direct=direct,cex.mn=2,xlab="",ylab="",dec.deg = F,add.scale = add.scale)
-        image(list(x = proj$x, y=proj$y, z = mod.res[[maps.to.make[m]]]), axes=F,add=T,breaks = lvls,col=cols)
-        if(contour == T) contour(x = proj$x, y=proj$y, z = mod.res[[maps.to.make[m]]], axes=F,add=T,levels = lvls,col="grey",drawlabels=F,lwd=1)
+        if(!is.null(mod.res[[maps.to.make[m]]])) {
+          image(list(x = proj$x, y=proj$y, z = mod.res[[maps.to.make[m]]]), axes=F,add=T,breaks = lvls,col=cols)
+          if(contour == T) contour(x = proj$x, y=proj$y, z = mod.res[[maps.to.make[m]]], axes=F,add=T,levels = lvls,col="grey",drawlabels=F,lwd=1)
+        }
         plot(bound.poly.surv.sp,add=T,lwd=2)
+        
         ################ ENd produce the figure################ ENd produce the figure################ ENd produce the figure
         ################ ENd produce the figure################ ENd produce the figure################ ENd produce the figure
   
@@ -952,6 +956,7 @@ for(i in 1:len)
     
     par(mfrow=c(1,1))
     if(add.title == F) survey.title <- ""
+    
     # Make the plot, this one is for cases in which we have survey strata
     if(length(strata.areas[,1]) > 0)
     {
@@ -971,6 +976,7 @@ for(i in 1:len)
       } # end if(banks[i] %in% c("Sab","GBb")) 
     } # end if(length(strata.areas[,1]) > 0)
     # For the banks without any strata
+    
     if(length(strata.areas[,1]) == 0)
     {
       ScallopMap(banks[i],direct = direct,cex.mn=2,boundries="offshore",
@@ -1114,7 +1120,7 @@ for(i in 1:len)
              pt.bg = c(rep(NA,length(surv.info$PName))),col='black',bty='n')
     } # End if(banks[i] == "BBs")
     # Add the survey boxes if they exist.
-    if(length(sb[,1]) > 0) addPolys(sb,lty=2,lwd=2)
+    if(length(sb[,1]) > 0) addPolys(as.PolySet(sb, projection = "LL"),lty=2,lwd=2)
     
     if(fig != "screen") dev.off()
     
