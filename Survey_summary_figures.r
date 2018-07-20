@@ -273,10 +273,17 @@ for(i in 1:len)
   
   # Get the strata areas.
   if(banks[i] %in% c("GBa","GBb","BBn","BBs")) strata.areas <- subset(survey.info,label==banks[i],select =c("PID","towable_area"))
-  if(banks[i] %in% c("Sab")) strata.areas <- subset(survey.info[!(survey.info$startyear==1900 & survey.info$label=="Sab"),], label==banks[i],select =c("PID","towable_area"))
+  if(banks[i] %in% c("Sab") & !yr < max(survey.info$startyear[survey.info$label=="Sab"])) {
+    strata.areas <- subset(survey.info[!(survey.info$startyear==1900 & survey.info$label=="Sab"),], label==banks[i],select =c("PID","towable_area"))}
+  if(banks[i] %in% c("Sab") & yr < max(survey.info$startyear[survey.info$label=="Sab"])) {
+    strata.areas <- subset(survey.info[!(survey.info$startyear==2018 & survey.info$label=="Sab"),], label==banks[i],select =c("PID","towable_area"))}
   if(banks[i] %in% c("GB", "Mid", "Ger")) strata.areas <- NULL
+  
   #Get all the details of the survey strata
-  surv.info <- subset(survey.info,label== banks[i])
+  if(banks[i] %in% c("Sab") & !yr < max(survey.info$startyear[survey.info$label==banks[i]])) surv.info <- subset(survey.info[!(survey.info$startyear==1900 & survey.info$label=="Sab"),],label== banks[i])
+  if(banks[i] %in% c("Sab") & yr < max(survey.info$startyear[survey.info$label==banks[i]])) surv.info <- subset(survey.info[!(survey.info$startyear==2018 & survey.info$label=="Sab"),],label== banks[i])
+  
+  if(!banks[i] %in% c("Sab")) surv.info <- subset(survey.info,label== banks[i])
   
   ### If we are missing years in the data I want to add those years in as NA's so the plots see those as NA's  ####
   check.year <- min(survey.obj[[banks[i]]][[1]]$year,na.rm=T):max(survey.obj[[banks[i]]][[1]]$year,na.rm=T)
@@ -399,7 +406,6 @@ for(i in 1:len)
       # This is how the mesh and A matrix are constructed
       # Build the mesh, for our purposes I'm hopeful this should do the trick, the offset makes the area a bit larger so the main predictions 
       #  should cover our entire survey area.
-      # browser()
       if(banks[i] != "GB") mesh <- inla.mesh.2d(loc, max.edge=c(0.03,0.075), offset=offset[i])
       if(banks[i] == "GB") mesh <- inla.mesh.2d(loc, max.edge=c(0.04,0.075), offset=offset[i])
       #windows(11,11) ; plot(mesh) ; plot(bound.poly.surv.sp,add=T,lwd=2)
@@ -967,9 +973,17 @@ for(i in 1:len)
       # I need to move the scale bar for Sable and GBb...
       if(banks[i] %in% c("Sab","GBb")) 
       {
-        ScallopMap(banks[i],poly.lst=list(detail.poly.surv,surv.info[surv.info$startyear==max(surv.info$startyear),]),direct = direct,cex.mn=2, boundries="offshore",
-                                                  plot.bathy=T,plot.boundries = T,bathy.source="quick", xlab="",ylab="",
-                                                  nafo.bord = F,nafo.lab = F,title=survey.title,dec.deg = F,add.scale = F)
+        if(yr < max(surv.info$startyear)) {
+          ScallopMap(banks[i],poly.lst=list(detail.poly.surv,surv.info[surv.info$startyear==min(surv.info$startyear),]),direct = direct,cex.mn=2, boundries="offshore",
+                     plot.bathy=T,plot.boundries = T,bathy.source="quick", xlab="",ylab="",
+                     nafo.bord = F,nafo.lab = F,title=survey.title,dec.deg = F,add.scale = F)
+        }
+        
+        if(yr == max(surv.info$startyear) | yr > max(surv.info$startyear)){
+          ScallopMap(banks[i],poly.lst=list(detail.poly.surv,surv.info[surv.info$startyear==max(surv.info$startyear),]),direct = direct,cex.mn=2, boundries="offshore",
+                     plot.bathy=T,plot.boundries = T,bathy.source="quick", xlab="",ylab="",
+                     nafo.bord = F,nafo.lab = F,title=survey.title,dec.deg = F,add.scale = F)
+        }
         # This will put the scale bottom left I think...
         #if(add.scale == T) maps::map.scale(min(smap.xlim)+0.1*(max(smap.xlim)-min(smap.xlim)),
                                            #min(smap.ylim)+0.1*(max(smap.ylim)-min(smap.ylim)),relwidth = 0.15,cex=0.6,ratio=F)
@@ -1241,7 +1255,7 @@ for(i in 1:len)
     if(fig == "png") png(paste(plot.dir,"/abundance_ts.png",sep=""),units="in",
                          width = 8.5, height = 11,res=420,bg="transparent")
     if(fig == "pdf") pdf(paste(plot.dir,"/abundance_ts.pdf",sep=""),width = 8.5, height = 11)
-    
+    browser()
     par(mfrow=c(1,1))
     if(banks[i] != "Ger" && banks[i] != "Mid" && banks[i] != "GB")
     {

@@ -322,7 +322,7 @@ survey.dat.restrat <- function(shf, htwt.fit, years, RS=80, CS=100, bk="Sab", ar
         strat.res$NR.cv[i] <- sqrt(NR.tmp[[2]]$var.yst) / NR.tmp[[2]]$yst
         strat.res$NPR.cv[i] <- sqrt(NPR.tmp[[2]]$var.yst) / NPR.tmp[[2]]$yst
         
-        # Save the bank-wide per tow estimates
+        # Save the bank-wide per tow mean estimates
         bankpertow <- rbind(bankpertow, data.frame(year=years[i], N = N.tmp[[2]]$yst, NR = NR.tmp[[2]]$yst, NPR = NPR.tmp[[2]]$yst, 
                                                    I=I.tmp[[2]]$yst, IR=IR.tmp[[2]]$yst, IPR=IPR.tmp[[2]]$yst))
        
@@ -423,15 +423,17 @@ survey.dat.restrat <- function(shf, htwt.fit, years, RS=80, CS=100, bk="Sab", ar
       strat.res$w.k[i] <- sum(w.yst[i,which(mw.bin==RS[i]):which(mw.bin==CS[i]-5)]) /
         sum(n.yst[i,which(mw.bin==RS[i]):which(mw.bin==CS[i]-5)])		
       
-      strat.res[i,] <- data.frame(year=years[i], n=strat.res$n[i], I=strat.res$I[[i]],
-                                  I.cv=strat.res$I.cv[i], IR=strat.res$IR[i], IR.cv=strat.res$IR.cv[i],
-                                  IPR=strat.res$IPR[i],  IPR.cv=strat.res$IPR.cv[i],
-                                  N=strat.res$N[i], N.cv=strat.res$N.cv[i],
-                                  NR=strat.res$NR[i], NR.cv=strat.res$NR.cv[i],
-                                  NPR=strat.res$NPR[i], NPR.cv=strat.res$NPR.cv[i], 
-                                  w.bar=strat.res$w.bar[i], l.bar=strat.res$l.bar[i],
-                                  l.k=strat.res$l.k[i], w.k=strat.res$w.k[i])
+      strat.res[i,] <- cbind(years[i], strat.res$n[i], strat.res$I[i],
+                                strat.res$I.cv[i], strat.res$IR[i], strat.res$IR.cv[i],
+                                  strat.res$IPR[i],  strat.res$IPR.cv[i],
+                                  strat.res$N[i], strat.res$N.cv[i],
+                                strat.res$NR[i], strat.res$NR.cv[i],
+                                  strat.res$NPR[i], strat.res$NPR.cv[i], 
+                                  strat.res$w.bar[i], strat.res$l.bar[i],
+                                  strat.res$l.k[i], strat.res$w.k[i])
       
+      strat.res[,2:dim(strat.res)[2]] <- apply(strat.res[,2:dim(strat.res)[2]], 2, function(x) as.numeric(as.character(x)))
+
       # Average size per tow
       ## total caught in tow
       num$tot <- rowSums(num[,1:40])
@@ -502,6 +504,11 @@ survey.dat.restrat <- function(shf, htwt.fit, years, RS=80, CS=100, bk="Sab", ar
         } # end for(m in 1:length(mean.names))
       } # end if(!is.null(user.bins))
     }# end for(i in 1:length(years))
+    
+    names(strat.res) <- c("year", "n", "I", "I.cv",
+                          "IR", "IR.cv", "IPR", "IPR.cv",
+                          "N", "N.cv", "NR", "NR.cv", "NPR", "NPR.cv",
+                          "w.bar", "l.bar", "l.k", "w.k")
     
     # Data for the delay-difference stock assessment model and survey summary
     if(!is.null(user.bins)) model.dat <- merge(strat.res,tmp)
