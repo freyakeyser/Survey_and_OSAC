@@ -518,12 +518,12 @@ survey.dat.restrat <- function(shf, htwt.fit, years, RS=80, CS=100, bk="Sab", ar
     # Data for shf plots used in the survey summary
     shf.dat <- list(n.yst=n.yst,w.yst=w.yst,n.stratmeans=n.stratmeans,w.stratmeans=w.stratmeans,avgsizepertow=avgsizepertow)
     # Return the data to function calling it.
-    
+
     model.dat$year <- as.numeric(as.character(model.dat$year))
     
     if(is.null(user.bins)) return(list(model.dat=model.dat,shf.dat=shf.dat,Strata.obj=Strata.obj, Domain.obj=Domain.obj, bankpertow=bankpertow))
     if(!is.null(user.bins)) return(list(model.dat=model.dat,shf.dat=shf.dat,Strata.obj=Strata.obj, Domain.obj=Domain.obj, bin.names = bnames,user.bins = user.bins, bankpertow=bankpertow))
-    
+
     model.dat
     
   }# end if(bk=="Sab")

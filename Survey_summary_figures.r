@@ -260,17 +260,32 @@ for(i in 1:len)
                                                                                    label==banks[i], 
                                                                                    select=c("PID", "SID", "POS", "X", "Y", "label")),
                                                                             projection ="LL")
-  if(banks[i] %in% c("Sab")) bound.poly.surv <-as.PolySet(subset(survey.bound.polys[!(survey.bound.polys$startyear==1900 & survey.bound.polys$label=="Sab"),],
+  if(banks[i] %in% c("Sab")) {
+    if(yr < max(survey.bound.polys$startyear)) bound.poly.surv <-as.PolySet(subset(survey.bound.polys[survey.bound.polys$startyear==1900,],
                                                                  label==banks[i], 
                                                                  select=c("PID", "SID", "POS", "X", "Y", "label")), 
                                                           projection ="LL")
+    if(!yr < max(survey.bound.polys$startyear)) bound.poly.surv <-as.PolySet(subset(survey.bound.polys[survey.bound.polys$startyear==2018,],
+                                                                                   label==banks[i], 
+                                                                                   select=c("PID", "SID", "POS", "X", "Y", "label")), 
+                                                                            projection ="LL")
+  }
   
-  #Detailed survey polygones
-  if(banks[i] %in% c("GBa","GBb","BBn","BBs","Sab")) detail.poly.surv <- as.PolySet(subset(survey.detail.polys[!(survey.detail.polys$startyear==1900 & survey.detail.polys$label=="Sab"),],
+  #Detailed survey polygons
+  if(banks[i] %in% c("GBa","GBb","BBn","BBs")) detail.poly.surv <- as.PolySet(subset(survey.detail.polys[!(survey.detail.polys$startyear==1900 & survey.detail.polys$label=="Sab"),],
                                                                                            label==banks[i], 
                                                                                            select=c("PID", "SID", "POS", "X", "Y", "label", "Strata_ID")),
                                                                                     projection = "LL")
-  
+  if(banks[i] %in% c("Sab")) {
+    if(yr < max(survey.detail.polys$startyear)) detail.poly.surv <- as.PolySet(subset(survey.detail.polys[survey.detail.polys$startyear==1900,],
+                                                                                      label==banks[i], 
+                                                                                      select=c("PID", "SID", "POS", "X", "Y", "label", "Strata_ID")),
+                                                                               projection = "LL")
+    if(!yr < max(survey.detail.polys$startyear)) detail.poly.surv <- as.PolySet(subset(survey.detail.polys[survey.detail.polys$startyear==2018,],
+                                                                                      label==banks[i], 
+                                                                                      select=c("PID", "SID", "POS", "X", "Y", "label", "Strata_ID")),
+                                                                               projection = "LL")
+  }
   # Get the strata areas.
   if(banks[i] %in% c("GBa","GBb","BBn","BBs")) strata.areas <- subset(survey.info,label==banks[i],select =c("PID","towable_area"))
   if(banks[i] %in% c("Sab") & !yr < max(survey.info$startyear[survey.info$label=="Sab"])) {
@@ -379,6 +394,7 @@ for(i in 1:len)
       # If we are just getting the spatial maps for the seedboxes then we want all of these plots
       # We also want them all if saving the INLA results.
       if(any(plots %in% "seedboxes")) seed.n.spatial.maps <- c("PR-spatial","Rec-spatial","FR-spatial","CF-spatial","MC-spatial","Clap-spatial")
+      
       # Next we get the survey locations
       if(banks[i] %in% c("Mid","Sab","Ger","BBn","BBs","Ban","SPB","GB"))
       {   
@@ -432,9 +448,9 @@ for(i in 1:len)
       # The spatial model, simple model with a intercept (overall bank average) with the spde spatial component
       # basically the random deviations for each piece of the mesh.
       formula3 <- y ~ 0 + a0 + f(s, model=spde)
-      
+
       # if we have maps to be made and we aren't simply loading in the INLA results we need to run this bit.
-      if(length(seed.n.spatial.maps > 0))
+      if(length(seed.n.spatial.maps) > 0)
       {
         # Get the data needed....
         if(banks[i] %in% c("GBb","GBa")) 
@@ -443,7 +459,7 @@ for(i in 1:len)
           tmp.cf <- rbind(CF.current[["GBa"]],CF.current[["GBb"]]) 
           tmp.clap <- rbind(surv.Clap[["GBa"]][surv.Clap[["GBa"]]$year == yr,],surv.Clap[["GBb"]][surv.Clap[["GBb"]]$year == yr,])
         }  # end if(banks[i] %in% c("GBb","GBa")) 
-        
+
         if(banks[i] %in% c("Mid","Sab","Ger","BBn","BBs","Ban","SPB","GB")) 
         {  
           tmp.dat <- surv.Live[[banks[i]]][surv.Live[[banks[i]]]$year == yr,]
@@ -569,6 +585,17 @@ for(i in 1:len)
         user.bins <- spr.survey.obj$user.bins
       } # end if(banks[i]  == "Ger")
       
+      # Get the data needed....
+      if(banks[i] %in% c("GBb","GBa")) 
+      {
+        tmp.dat <- rbind(surv.Live[["GBa"]][surv.Live[["GBa"]]$year == yr,],surv.Live[["GBb"]][surv.Live[["GBb"]]$year == yr,])
+      }  # end if(banks[i] %in% c("GBb","GBa")) 
+      
+      if(banks[i] %in% c("Mid","Sab","Ger","BBn","BBs","Ban","SPB","GB")) 
+      {  
+        tmp.dat <- surv.Live[[banks[i]]][surv.Live[[banks[i]]]$year == yr,]
+      } # end if(banks[i] %in% c("Mid","Sab","Ger","BBn","BBs","Ban","SPB","GB")) 
+      
       # Only run the models if not loading them....
       if(length(grep("run",INLA)) > 0)
       {
@@ -585,11 +612,19 @@ for(i in 1:len)
           # This is the INLA model itself
           mod <- inla(formula3, family=family1, data = inla.stack.data(stk),
                       control.predictor=list(A=inla.stack.A(stk),link=link, compute=TRUE))
+          # Now that this is done we need to make a prediction grid for projection onto our mesh,
+          proj <- inla.mesh.projector(mesh,xlim=xyl[1, ], ylim=xyl[2,],dims = s.res) # 500 x 500 gives very fine results but is slow.        
+          if(banks[i] %in% c("Sab","Mid"))
+          {
+            simplemesh <- inla.mesh.2d(boundary = bound,max.edge = 1e9)
+            pred.in <- inla.mesh.projector(simplemesh,proj$lattice$loc)$proj$ok
+          } # end if(banks[i] == "Sab")
           # Then make a matrix of the correct dimension
           mod.res[[bin.names[k]]] <- inla.mesh.project(proj, exp(mod$summary.random$s$mean + mod$summary.fixed$mean))
           # Get rid of all data outside our plotting area...
           mod.res[[bin.names[k]]][!pred.in] <- NA
         } # End for(k in 1:num.bins)
+        browser()
       } #end if(length(grep("run",INLA)) > 0)
     }# end i if(any(plots == "user.SH.bins") || length(grep("run",INLA)) > 0)
 
@@ -973,20 +1008,13 @@ for(i in 1:len)
       # I need to move the scale bar for Sable and GBb...
       if(banks[i] %in% c("Sab","GBb")) 
       {
-        if(yr < max(surv.info$startyear)) {
-          ScallopMap(banks[i],poly.lst=list(detail.poly.surv,surv.info[surv.info$startyear==min(surv.info$startyear),]),direct = direct,cex.mn=2, boundries="offshore",
-                     plot.bathy=T,plot.boundries = T,bathy.source="quick", xlab="",ylab="",
-                     nafo.bord = F,nafo.lab = F,title=survey.title,dec.deg = F,add.scale = F)
-        }
+        ScallopMap(banks[i],poly.lst=list(detail.poly.surv,surv.info),direct = direct,cex.mn=2, boundries="offshore",
+                   plot.bathy=T,plot.boundries = T,bathy.source="quick", xlab="",ylab="",
+                   nafo.bord = F,nafo.lab = F,title=survey.title,dec.deg = F,add.scale = F)
         
-        if(yr == max(surv.info$startyear) | yr > max(surv.info$startyear)){
-          ScallopMap(banks[i],poly.lst=list(detail.poly.surv,surv.info[surv.info$startyear==max(surv.info$startyear),]),direct = direct,cex.mn=2, boundries="offshore",
-                     plot.bathy=T,plot.boundries = T,bathy.source="quick", xlab="",ylab="",
-                     nafo.bord = F,nafo.lab = F,title=survey.title,dec.deg = F,add.scale = F)
-        }
         # This will put the scale bottom left I think...
         #if(add.scale == T) maps::map.scale(min(smap.xlim)+0.1*(max(smap.xlim)-min(smap.xlim)),
-                                           #min(smap.ylim)+0.1*(max(smap.ylim)-min(smap.ylim)),relwidth = 0.15,cex=0.6,ratio=F)
+        #                                   min(smap.ylim)+0.1*(max(smap.ylim)-min(smap.ylim)),relwidth = 0.15,cex=0.6,ratio=F)
       } # end if(banks[i] %in% c("Sab","GBb")) 
     } # end if(length(strata.areas[,1]) > 0)
     # For the banks without any strata
@@ -1255,7 +1283,7 @@ for(i in 1:len)
     if(fig == "png") png(paste(plot.dir,"/abundance_ts.png",sep=""),units="in",
                          width = 8.5, height = 11,res=420,bg="transparent")
     if(fig == "pdf") pdf(paste(plot.dir,"/abundance_ts.pdf",sep=""),width = 8.5, height = 11)
-    browser()
+
     par(mfrow=c(1,1))
     if(banks[i] != "Ger" && banks[i] != "Mid" && banks[i] != "GB")
     {
