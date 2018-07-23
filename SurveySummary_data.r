@@ -497,7 +497,7 @@ years <- yr.start:yr
 		} # end if(bnk == "Ger")
 		# Fill the years without any data with NA's (this helps with plotting data.)
 		cf.data[[bnk]]$CFyrs <-merge(cf.data[[bnk]]$CFyrs,data.frame(year=1983:yr),all=T)
-		
+		browser()
 		# Output the predictions for the bank
 		surv.dat[[bnk]] <- cf.data[[bnk]]$pred.dat
 		# Pull out the ID and condition factor
