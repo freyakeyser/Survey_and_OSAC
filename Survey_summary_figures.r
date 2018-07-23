@@ -299,7 +299,7 @@ for(i in 1:len)
   if(banks[i] %in% c("Sab") & yr < max(survey.info$startyear[survey.info$label==banks[i]])) surv.info <- subset(survey.info[!(survey.info$startyear==2018 & survey.info$label=="Sab"),],label== banks[i])
   
   if(!banks[i] %in% c("Sab")) surv.info <- subset(survey.info,label== banks[i])
-  
+
   ### If we are missing years in the data I want to add those years in as NA's so the plots see those as NA's  ####
   check.year <- min(survey.obj[[banks[i]]][[1]]$year,na.rm=T):max(survey.obj[[banks[i]]][[1]]$year,na.rm=T)
   missing.year <- check.year[!is.element(check.year,survey.obj[[banks[i]]][[1]]$year)]
@@ -326,7 +326,7 @@ for(i in 1:len)
   } # if(length(missing.year > 0))
   
   ################################# START MAKING FIGURES################################# START MAKING FIGURES################################# 
-  
+
 ################  The non-survey spatial plots ###########################
 ################  Next up are the rest of the spatial plots ###########################
 ################  Next up are the rest of the spatial plots ###########################
@@ -624,7 +624,6 @@ for(i in 1:len)
           # Get rid of all data outside our plotting area...
           mod.res[[bin.names[k]]][!pred.in] <- NA
         } # End for(k in 1:num.bins)
-        browser()
       } #end if(length(grep("run",INLA)) > 0)
     }# end i if(any(plots == "user.SH.bins") || length(grep("run",INLA)) > 0)
 
@@ -1294,6 +1293,7 @@ for(i in 1:len)
     # For german bank
     if(banks[i] == "Ger")
     {
+      browser()
       survey.ts(survey.obj[[banks[i]]][[1]],min(survey.obj[[banks[i]]][[1]]$year,na.rm=T):yr,Bank=banks[i],pdf=F, 
                 ymin=-5,dat2=merged.survey.obj,clr=c('blue','red',"blue"),pch=c(16,17),se=T,yl2=400,
                 add.title = T,titl = survey.ts.N.title,cx.mn=3,axis.cx = 1.5)

@@ -40,7 +40,7 @@ sprSurv<-function(dat,years,towlist=NULL,print=F,chng=F,user.bins = NULL)
 {
   # load the spr package, note this is a locally developed package not available from R repositories
   require(spr)  || stop("spr package required please obtain a copy and install this locally developed package")
-  
+
   # Make the first element in the list a data.frame with appropriate headers.
   out.obj<-list(NULL)
   out.obj[[1]]<-data.frame(year=years,n=with(subset(dat,year%in%years),tapply(tow,year,length)),
